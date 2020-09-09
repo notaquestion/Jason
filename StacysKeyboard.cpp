@@ -171,6 +171,8 @@ const int PrimaryInput = 2;
 const int SeccondInput = 11;
 const int ThirdInput = 12;
 
+float MouseTimer = 0.0;
+
 void setup() { // initialize the buttons' inputs:
   
   pinMode(PrimaryInput, INPUT);
@@ -456,6 +458,17 @@ void loop() {
             }
          }
     }
+    else if(CurrentMenu == "MouseMenu")
+    {
+      doWhat = AwaitInput(1);
+
+      float MouseSpeed = 1.0
+
+      Mouse.move(MouseSpeed * sin(MouseTimer), MouseSpeed * cos(MouseTimer));
+
+
+      MouseTimer += 0.01;
+    }
     
 }
 
@@ -524,8 +537,6 @@ Commands AwaitInput(int FramesToWait)
   int i = 0;
   while (i < FramesToWait)
   {
-    //fillOverTime(PendingColor, i, FramesToWait);
-
     if(digitalRead(PrimaryInput) == LOW) //No Input
     {
       ++i;
@@ -541,7 +552,7 @@ Commands AwaitInput(int FramesToWait)
       digitalWrite(LED_BUILTIN, HIGH);
       while(t <= longInputDelay && digitalRead(PrimaryInput) == HIGH)
       {
-        fillOverTime(PendingColor, t, FramesToWait);
+        fillOverTime(PendingColor, t, longInputDelay);
         t += 1;
         delay(1);
       }
