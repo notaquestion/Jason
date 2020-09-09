@@ -167,9 +167,13 @@ int shortDelay = 2500;
 int longDelay = 3500;
 int inputDelay = 5;
 
+const int PrimaryInput = 2;
+const int SeccondInput = 11;
+const int Thrid Input = 12;
+
 void setup() { // initialize the buttons' inputs:
   
-  pinMode(2, INPUT);
+  pinMode(PrimaryInput, INPUT);
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(9600);
   // initialize mouse control:
@@ -210,12 +214,12 @@ void loop() {
 
       int t = 0;
 
-      if(digitalRead(2) == HIGH)
+      if(digitalRead(PrimaryInput) == HIGH)
       {
         DisplayText("Hold To Start");
         colorWipe(strip.Color(  25, 25,   25), 25); // Green
         strip.show();
-        while(digitalRead(2) == HIGH)
+        while(digitalRead(PrimaryInput) == HIGH)
         {
           t += 1;
           delay(1);
@@ -500,13 +504,13 @@ Commands AwaitInput(int FramesToWait)
   while (i < FramesToWait)
   {
 
-    if(digitalRead(2) == LOW) //No Input
+    if(digitalRead(PrimaryInput) == LOW) //No Input
     {
       ++i;
       delay(1);
       digitalWrite(LED_BUILTIN, LOW);
     }
-    else if(digitalRead(2) == HIGH) //Input Detected
+    else if(digitalRead(PrimaryInput) == HIGH) //Input Detected
     {
       int t = 0;
       // Fill along the length of the strip in various colors...
@@ -518,7 +522,7 @@ Commands AwaitInput(int FramesToWait)
 
 
       digitalWrite(LED_BUILTIN, HIGH);
-      while(t <= 1000 && digitalRead(2) == HIGH)
+      while(t <= 1000 && digitalRead(PrimaryInput) == HIGH)
       {
         
         t += 1;
