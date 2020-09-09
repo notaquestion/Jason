@@ -74,17 +74,26 @@ String MainMenuContent[] = {
   "End"
 };
 
-String SpecialMenu[] = {
+String SpecialKeyMenu[] = {
   "Enter",
   "Tab",
-  "LeftArrow",
-  "RightArrow",
-  "UpArrow",
-  "DownArrow",
-  "CapsLock",
+  // "LeftArrow",
+  // "RightArrow",
+  // "UpArrow",
+  // "DownArrow",
+  // "CapsLock",
   //Home, End, INS, DEL, TAB, ALT (Select Once for Press, 2x for hold)
   "End"
 };
+
+String OptionsMenu[] = {
+  "FasterCycleSpeed",
+  "LongerCycleSpeed",
+  "ShorterGoBackInput",
+  "LongerGoBackInput",
+  "End"
+};
+
 
 String SymbolMenu[] = {
   ".",
@@ -111,10 +120,8 @@ String SymbolMenu[] = {
 String KeyboardMenu[] = {
   "Type Letter",
   "BackSpace",
-  "Enter", //Replace with Special MEnu
-  "Tab", // Replace with Special Menu
-  "IncreaseDelay",
-  "ReduceDelay",
+  "SpecialKeyMenu",
+  "OptionsMenu",
   "End"
 };
 
@@ -145,13 +152,6 @@ char LettersByFrequency[] = {
   'k', 'v', 'j', 'q', 'x', 'z'};
 
 char LetterClumps[6][6] = {
-// {'_', 'e', 't', 's', 'd', 'w'},
-// {'o', 'h', 'i', 'l', 'f', 'k'},
-// {'a', 'n', 'u', 'g', 'v', 'z'},
-// {'r', 'y', 'c', 'j', '1', '2'},
-// {'m', 'b', 'q', '3', '4', '5'},
-// {'p', 'x', '6', '7', '8', '9'}
-
 {'_', 'E', 'T', 'S', 'D', 'W'},
 {'O', 'H', 'I', 'L', 'F', 'K'},
 {'A', 'N', 'U', 'G', 'V', 'Z'},
@@ -160,17 +160,10 @@ char LetterClumps[6][6] = {
 {'P', 'X', '6', '7', '8', '9'}
 };
 
-  // {'e', 'o', 't', 'h', 'a', 's'},
-  // {'i', 'n', 'r', 'd', 'l', 'u'},
-  // {'y', 'm', 'w', 'f', 'g', 'c'},
-  // {'b', 'p', 'k', 'v', 'j', 'q'},
-  // {'x', 'z', '1', '2', '3', '4'},
-  // {'5', '6', '7', '8', '9', '0'}
 
 char CurrentCharChoices[6];
 
 int cycleSpeed = 3000;
-int shortInputDelay = 2500;
 int longInputDelay = 3500;
 int inputDelay = 5;
 
@@ -251,34 +244,21 @@ void loop() {
               Keyboard.write(KEY_BACKSPACE);
               CurrentSelection = "";
             }
-            else if(CurrentSelection == "Enter")
-            {
-              Keyboard.write(KEY_RETURN);
-              CurrentSelection = "";
-            }
-            else if(CurrentSelection == "Tab")
-            {
-              Keyboard.write(KEY_TAB);
-              CurrentSelection = "";
-            }
-            else if(CurrentSelection == "CapsLock")
-            {
-              CurrentSelection = "";
-            }
-            else if(CurrentSelection == "Escape")
-            {
-              CurrentSelection = "";
-            }
-            else if(CurrentSelection == "IncreaseDelay")
-            {
-              IncreaseDelay();
-              CurrentSelection = "";
-            }
-            else if(CurrentSelection == "ReduceDelay")
-            {
-              ShortenDelay();
-              CurrentSelection = "";
-            }
+            // else if(CurrentSelection == "")
+            // {
+            //   CurrentSelection = "";
+            // }
+            
+            // else if(CurrentSelection == "IncreaseDelay")
+            // {
+            //   IncreaseDelay();
+            //   CurrentSelection = "";
+            // }
+            // else if(CurrentSelection == "ReduceDelay")
+            // {
+            //   ShortenDelay();
+            //   CurrentSelection = "";
+            // }
             else
             {
               CurrentMenu = CurrentSelection;
@@ -388,36 +368,95 @@ void loop() {
        
     }
     
-    
-    else if(CurrentMenu == "Arrow Keys")
+
+    else if(CurrentMenu == "SpecialKeyMenu")
     {
+      doWhat = DisplayMenuOptions(SpecialKeyMenu);
+      // KEY_LEFT_CTRL   
+      // KEY_LEFT_SHIFT  
+      // KEY_LEFT_ALT    
+      // KEY_LEFT_GUI    
+  
+      // KEY_UP_ARROW    
+      // KEY_DOWN_ARROW  
+      // KEY_LEFT_ARROW  
+      // KEY_RIGHT_ARROW 
+      // KEY_RETURN
+      // KEY_INSERT
+      // KEY_DELETE
+      // KEY_PAGE_UP
+      // KEY_PAGE_DOWN
+      // KEY_HOME
+      // KEY_END
+      // KEY_CAPS_LOCK
+      // KEY_F1 ..
 
+       if(doWhat == Back)
+       {
+        CurrentMenu = "KeyboardMenu";
+       }
+       else if(doWhat == Select1)
+       {
+          if(CurrentSelection == "Enter")
+          {
+            Keyboard.write(KEY_RETURN);
+            CurrentSelection = "";
+          }
+          else if(CurrentSelection == "Tab")
+          {
+            Keyboard.write(KEY_TAB);
+            CurrentSelection = "";
+          }
+          else if(CurrentSelection == "CapsLock")
+          {
+            Keyboard.write(KEY_CAPS_LOCK);
+            CurrentSelection = "";
+          }
+          else if(CurrentSelection == "Escape")
+          {
+            Keyboard.write(KEY_ESC);
+            CurrentSelection = "KEY_ESC";
+          }
+        }
     }
-    else if(CurrentMenu == "Other Keys")
+    else if(CurrentMenu == "OptionsMenu")
     {
+      doWhat = DisplayMenuOptions(OptionsMenu);
 
+         if(doWhat == Back)
+         {
+          CurrentMenu = "KeyboardMenu";
+         }
+         else if(doWhat == Select1)
+         {
+            if(CurrentSelection == "FasterCycleSpeed")
+            {
+              FasterCycleSpeed();
+              CurrentSelection = "";
+            }
+            else if(CurrentSelection == "LongerCycleSpeed")
+            {
+              SlowerCycleSpeed();
+              CurrentSelection = "";
+            }
+            else if(CurrentSelection == "ShorterGoBackInput")
+            {
+               ShortenDelay();
+              CurrentSelection = "";
+            }
+            else if(CurrentSelection == "LongerGoBackInput")
+            {
+              IncreaseDelay();
+              CurrentSelection = "";
+            }
+            else
+            {
+              CurrentMenu = CurrentSelection;
+              CurrentSelection = "";
+            }
+         }
     }
     
-    
-
-//    for(int g = 0; g < 6; ++g)
-//    {
-//      for(int i = 0; i < 6; ++i)
-//      {
-//          Keyboard.write(LetterClumps[g][i]);
-//      }
-//
-//      delay(1000);
-//
-//      for(int b = 0; b < 6; ++b)
-//      {
-//        Keyboard.write(KEY_BACKSPACE);
-//      }
-//
-//    }
-
-
-    //Keyboard.write('m');
 }
 
 
@@ -479,7 +518,7 @@ Commands DisplayMenuOptions(String menu_[])
 
 Commands AwaitInput(int FramesToWait)
 {
-  delay(100);
+  delay(50);
   
 
   int i = 0;
@@ -492,6 +531,8 @@ Commands AwaitInput(int FramesToWait)
       ++i;
       delay(1);
       digitalWrite(LED_BUILTIN, LOW);
+
+      CycleSpeedOptions();
     }
     else if(digitalRead(PrimaryInput) == HIGH) //Input Detected
     {
@@ -511,11 +552,11 @@ Commands AwaitInput(int FramesToWait)
 
       if(t >= longInputDelay)
       {
-        DisplayText(" --Back--");
-        colorWipe(strip.Color(  255, 0,   0), 25); // Green\
+        DisplayText(" --Back-- ");
+        colorWipe(GoBackColor, 25); 
         strip.show();
         delay(500);
-        ClearText(" --Back--");
+        ClearText(" --Back-- ");
         
         strip.clear();
         strip.show();
@@ -523,11 +564,13 @@ Commands AwaitInput(int FramesToWait)
       }
       else if (t >= inputDelay)
       {
-        DisplayText(" --Selected--");
-        colorWipe(strip.Color(  0, 255,   0), 25); // Green
+        DisplayText(" --Selected-- ");
+        DisplayText(String(t));
+        colorWipe(ConfirmColor, 25); 
         strip.show();
         delay(500);
-        ClearText(" --Selected--");
+        ClearText(String(t));
+        ClearText(" --Selected-- ");
 
         strip.clear();
         strip.show();
@@ -567,21 +610,89 @@ void RemoveCursor()
 
 void ShortenDelay()
 {
-  shortInputDelay -=200;
-  longInputDelay -=200;
-  cycleSpeed *= 0.9;
-  Serial.println(cycleSpeed);
+  longInputDelay -= 250;
+  String message = String("Hold Time for Back: " + String(longInputDelay));
+  DisplayText(message);
+  delay(2000);
+  ClearText(message);
+  //Serial.println(cycleSpeed);
 }
 
 void IncreaseDelay()
 {
-  shortInputDelay += 400;
-  longInputDelay += 400;
-  cycleSpeed *= 1.2;
-  Serial.println(cycleSpeed);
+  longInputDelay += 500;
+  String message = String("Hold Time For Back: " + String(longInputDelay));
+  DisplayText(message);
+  delay(2000);
+  ClearText(message);
+  //Serial.println(cycleSpeed);
 }
 
+void FasterCycleSpeed()
+{
+  cycleSpeed *= 0.9;
+  String message = String("CycleSpeed: " + String(cycleSpeed));
+  DisplayText(message);
+  delay(2000);
+  ClearText(message);
+}
 
+void SlowerCycleSpeed()
+{
+  cycleSpeed *= 1.2;
+  String message = String("CycleSpeed: " + String(cycleSpeed));
+  DisplayText(message);
+  delay(2000);
+  ClearText(message);
+}
+
+void CycleSpeedOptions()
+{
+  if(digitalRead(SeccondInput))
+  {
+    int t = 0;
+
+    digitalWrite(LED_BUILTIN, HIGH);
+    while(digitalRead(SeccondInput) == HIGH)
+    {
+      t += 1;
+      delay(1);
+    }
+    digitalWrite(LED_BUILTIN, LOW);
+
+
+    if(t >= 200)
+    {
+      longInputDelay = t;
+      String message = String("Hold Time for Back: " + String(longInputDelay));
+      DisplayText(message);
+      delay(2000);
+      ClearText(message);
+    }
+  }
+  else if(digitalRead(ThirdInput))
+  {
+    int t = 0;
+
+    digitalWrite(LED_BUILTIN, HIGH);
+    while(digitalRead(ThirdInput) == HIGH)
+    {
+      t += 1;
+      delay(1);
+    }
+    digitalWrite(LED_BUILTIN, LOW);
+
+
+    if(t >= 300)
+    {
+      cycleSpeed = t;
+      String message = String("CycleSpeed: " + String(cycleSpeed));
+      DisplayText(message);
+      delay(2000);
+      ClearText(message);
+    }
+  }
+}
 
 void MoveMouse()
 {
@@ -647,7 +758,7 @@ void theaterChaseRainbow(int wait) {
 
 void fillOverTime(uint32_t color, int currentTime, int maxTime)
 {
-  int numToFill = 1 + ((float)currentTime/(float)maxTime) * ((strip.numPixels() - 1));
+  int numToFill = 1 + ((float)currentTime/(float)maxTime) * ((strip.numPixels() - 2));
   Serial.println(numToFill);
 
   strip.clear();
