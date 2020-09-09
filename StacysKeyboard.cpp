@@ -62,15 +62,16 @@ enum Commands {None, Back, Select1};
 
 Commands NextCommand = None;
 
-String CurrentMenu = "MainMenuContent";
+String CurrentMenu = "IdleMenu";
 String CurrentSelection = "";
 
 String MenuDepths[5];
 int CurrentMenuDepth = 0;
 
 String MainMenuContent[] = {
-  "Type",
-  "Mouse",
+  "MouseMenu",
+  "KeyboardMenu",
+  "OptionsMenu",
   "End"
 };
 
@@ -121,7 +122,6 @@ String KeyboardMenu[] = {
   "Type Letter",
   "BackSpace",
   "SpecialKeyMenu",
-  "OptionsMenu",
   "End"
 };
 
@@ -212,9 +212,8 @@ void loop() {
     
     delay(1);
 
-    if(CurrentMenu == "MainMenuContent")
+    if(CurrentMenu == "IdleMenu")
     {
-
       int t = 0;
 
       doWhat = AwaitInput(cycleSpeed);
@@ -222,13 +221,34 @@ void loop() {
       if(doWhat == Back)
       {
 
-        CurrentMenu = "KeyboardMenu";
+        CurrentMenu = "MainMenuContent";
         delay(500);
         // strip.clear();
         // strip.show();
       }
-        
-        //DisplayMenuOptions(MainMenuContent);
+    }
+    if(CurrentMenu == "MainMenuContent")
+    {
+      doWhat = DisplayMenuOptions(MainMenuContent);
+      //DisplayMenuOptions(MainMenuContent);
+
+      if(doWhat == Back)
+      {
+        CurrentMenu = "IdleMenu";
+      }
+      else if(doWhat == Select1)
+         {
+          
+            if(false)
+            {
+
+            }
+            else
+            {
+              CurrentMenu = CurrentSelection;
+              CurrentSelection = "";
+            }
+         }
     }
     else if(CurrentMenu == "KeyboardMenu")
     {
@@ -460,14 +480,60 @@ void loop() {
     }
     else if(CurrentMenu == "MouseMenu")
     {
-      doWhat = AwaitInput(1);
+      
+      //doWhat = AwaitInput(1);
 
-      float MouseSpeed = 1.0
+      float MouseSpeed = 2;
+      int MoveDelay = 500;
+      int Moves = 6;
+      bool xDirection = false;
 
-      Mouse.move(MouseSpeed * sin(MouseTimer), MouseSpeed * cos(MouseTimer));
+      float xMax = MouseSpeed * (float)cos(MouseTimer);
+      float yMax = MouseSpeed * (float)sin(MouseTimer);
 
+      int xMove = (round(xMax));
+      int yMove = (round(yMax));
 
-      MouseTimer += 0.01;
+      Mouse.move(xMove, yMove);
+      delay(70);
+
+      int heldTime = 0;
+      if(digitalRead(PrimaryInput))
+      {
+
+        while(digitalRead(PrimaryInput) && heldTime < MoveDelay)
+        {
+          ++heldTime;
+          delay(1);
+        }
+        
+        if(heldTime >= MoveDelay)
+        {
+          heldTime = 0;
+          while(digitalRead(PrimaryInput))
+          {
+            Mouse.move(heldTime * 0.1 * xMove, heldTime * 0.1 * yMove);
+            delay(50);
+            ++heldTime;
+            fillOverTime(PendingColor, heldTime, 100);
+          }
+
+          if(heldTime > 100)
+          {
+            CurrentMenu = "MainMenuContent";
+          }
+        }
+        else
+        {
+          colorWipe(ConfirmColor, 25);
+          Mouse.click(MOUSE_LEFT);
+        }
+      }
+
+      if(!digitalRead(PrimaryInput))
+      {
+        MouseTimer += 0.1;
+      }
     }
     
 }
@@ -532,7 +598,7 @@ Commands DisplayMenuOptions(String menu_[])
 Commands AwaitInput(int FramesToWait)
 {
   delay(50);
-  
+  bool hasBeenFalse = false; //Has this ever been false? TO prevent button from being held accidentily as part of last press.
 
   int i = 0;
   while (i < FramesToWait)
@@ -543,9 +609,11 @@ Commands AwaitInput(int FramesToWait)
       delay(1);
       digitalWrite(LED_BUILTIN, LOW);
 
+      hasBeenFalse = true;
+
       CycleSpeedOptions();
     }
-    else if(digitalRead(PrimaryInput) == HIGH) //Input Detected
+    else if(digitalRead(PrimaryInput) == HIGH && hasBeenFalse) 
     {
       int t = 0;
 
@@ -622,7 +690,7 @@ void RemoveCursor()
 void ShortenDelay()
 {
   longInputDelay -= 250;
-  String message = String("Hold Time for Back: " + String(longInputDelay));
+  String message = String("  --  Hold Time for Back: " + String(longInputDelay));
   DisplayText(message);
   delay(2000);
   ClearText(message);
@@ -632,7 +700,7 @@ void ShortenDelay()
 void IncreaseDelay()
 {
   longInputDelay += 500;
-  String message = String("Hold Time For Back: " + String(longInputDelay));
+  String message = String("  --  Hold Time For Back: " + String(longInputDelay));
   DisplayText(message);
   delay(2000);
   ClearText(message);
@@ -642,7 +710,7 @@ void IncreaseDelay()
 void FasterCycleSpeed()
 {
   cycleSpeed *= 0.9;
-  String message = String("CycleSpeed: " + String(cycleSpeed));
+  String message = String("  --  CycleSpeed: " + String(cycleSpeed));
   DisplayText(message);
   delay(2000);
   ClearText(message);
@@ -651,7 +719,7 @@ void FasterCycleSpeed()
 void SlowerCycleSpeed()
 {
   cycleSpeed *= 1.2;
-  String message = String("CycleSpeed: " + String(cycleSpeed));
+  String message = String("  --  CycleSpeed: " + String(cycleSpeed));
   DisplayText(message);
   delay(2000);
   ClearText(message);
@@ -675,7 +743,7 @@ void CycleSpeedOptions()
     if(t >= 200)
     {
       longInputDelay = t;
-      String message = String("Hold Time for Back: " + String(longInputDelay));
+      String message = String("  --  Hold Time for Back: " + String(longInputDelay));
       DisplayText(message);
       delay(2000);
       ClearText(message);
@@ -697,7 +765,7 @@ void CycleSpeedOptions()
     if(t >= 300)
     {
       cycleSpeed = t;
-      String message = String("CycleSpeed: " + String(cycleSpeed));
+      String message = String("  --  CycleSpeed: " + String(cycleSpeed));
       DisplayText(message);
       delay(2000);
       ClearText(message);
