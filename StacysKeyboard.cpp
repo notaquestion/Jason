@@ -47,6 +47,12 @@ Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 //   NEO_RGB     Pixels are wired for RGB bitstream (v1 FLORA pixels, not v2)
 //   NEO_RGBW    Pixels are wired for RGBW bitstream (NeoPixel RGBW products)
 
+
+uint32_t StartupColor = strip.Color(30, 30, 30);
+uint32_t PendingColor = strip.Color(203, 245, 66);
+uint32_t ConfirmColor = strip.Color(0, 255, 0);
+uint32_t GoBackColor = strip.Color(255, 0, 0);
+
 //INSTRUCTIONS: Hold 1.5s to go back 1 menu. Tap to select.
 
 
@@ -146,12 +152,12 @@ char LetterClumps[6][6] = {
 // {'m', 'b', 'q', '3', '4', '5'},
 // {'p', 'x', '6', '7', '8', '9'}
 
-  {'_', 'E', 'T', 'S', 'D', 'W'},
-  {'O', 'H', 'I', 'L', 'F', 'K'},
-  {'A', 'N', 'U', 'G', 'V', 'Z'},
-  {'R', 'Y', 'C', 'J', '1', '2'},
-  {'M', 'B', 'Q', '3', '4', '5'},
-  {'P', 'X', '6', '7', '8', '9'}
+{'_', 'E', 'T', 'S', 'D', 'W'},
+{'O', 'H', 'I', 'L', 'F', 'K'},
+{'A', 'N', 'U', 'G', 'V', 'Z'},
+{'R', 'Y', 'C', 'J', '1', '2'},
+{'M', 'B', 'Q', '3', '4', '5'},
+{'P', 'X', '6', '7', '8', '9'}
 };
 
   // {'e', 'o', 't', 'h', 'a', 's'},
@@ -163,13 +169,14 @@ char LetterClumps[6][6] = {
 
 char CurrentCharChoices[6];
 
-int shortDelay = 2500;
-int longDelay = 3500;
+int cycleSpeed = 3000;
+int shortInputDelay = 2500;
+int longInputDelay = 3500;
 int inputDelay = 5;
 
 const int PrimaryInput = 2;
 const int SeccondInput = 11;
-const int Thrid Input = 12;
+const int ThirdInput = 12;
 
 void setup() { // initialize the buttons' inputs:
   
@@ -193,10 +200,11 @@ void setup() { // initialize the buttons' inputs:
   strip.setBrightness(50); // Set BRIGHTNESS to about 1/5 (max = 255)
 
   //delay(100);
-  colorWipe(strip.Color(  255, 0,   0), 25); // Green
+  theaterChaseRainbow(50);
   strip.show();
-  delay(100);
+  delay(500);
   strip.clear();
+  strip.show();
 
   // strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   // strip.show();            // Turn OFF all pixels ASAP
@@ -205,7 +213,7 @@ void setup() { // initialize the buttons' inputs:
 
 void loop() {
 
-   
+   Commands doWhat;
     
     delay(1);
 
@@ -214,46 +222,22 @@ void loop() {
 
       int t = 0;
 
-      if(digitalRead(PrimaryInput) == HIGH)
+      doWhat = AwaitInput(cycleSpeed);
+
+      if(doWhat == Back)
       {
-        DisplayText("Hold To Start");
-        colorWipe(strip.Color(  25, 25,   25), 25); // Green
-        strip.show();
-        while(digitalRead(PrimaryInput) == HIGH)
-        {
-          t += 1;
-          delay(1);
-        }
-        
-        ClearText("Hold To Start");
 
-        
-        if(t > 500)
-        {
-          colorWipe(strip.Color(  0, 255,   0), 25); // Green
-          strip.show();
-          delay(500);
-
-          CurrentMenu = "KeyboardMenu";
-        }
-
-        strip.clear();
-        strip.show();
+        CurrentMenu = "KeyboardMenu";
+        delay(500);
+        // strip.clear();
+        // strip.show();
       }
-
-
-        // while(AwaitInput(shortDelay) != Back)
-        // {
-        //   delay(10);
-        // }
-
-        
         
         //DisplayMenuOptions(MainMenuContent);
     }
     else if(CurrentMenu == "KeyboardMenu")
     {
-         Commands doWhat = DisplayMenuOptions(KeyboardMenu);
+         doWhat = DisplayMenuOptions(KeyboardMenu);
 
          if(doWhat == Back)
          {
@@ -306,7 +290,6 @@ void loop() {
     {
       AddCurrsor();
 
-      Commands doWhat;
       for(int g = 0; g < 6; ++g)
       {
         Keyboard.write(' ');
@@ -320,7 +303,7 @@ void loop() {
          }
           Keyboard.write('<');
           Keyboard.write(' ');
-         doWhat = AwaitInput(shortDelay);
+         doWhat = AwaitInput(cycleSpeed);
          for(int b = 0; b < 10; ++b)//Delete cursor and letter choices
          {
            Keyboard.write(KEY_BACKSPACE);
@@ -347,7 +330,6 @@ void loop() {
       AddCurrsor();
 
       char charToType = '\0';
-      Commands doWhat;
       Keyboard.write('>');
       for(int i = 0; i < 6 && charToType == '\0'; ++i)
       {
@@ -369,7 +351,7 @@ void loop() {
         }
         Keyboard.write('<');
         //Keyboard.write(CurrentCharChoices[i]);
-        doWhat = AwaitInput(shortDelay);
+        doWhat = AwaitInput(cycleSpeed);
 
         if(doWhat == Select1)
         {
@@ -471,7 +453,7 @@ Commands DisplayMenuOptions(String menu_[])
 
       DisplayText(selectionToDisplay);
 
-      doWhat = AwaitInput(shortDelay); //Will return true when input conditoin true, or false in 1000 frames.
+      doWhat = AwaitInput(cycleSpeed); //Will return true when input conditoin true, or false in 1000 frames.
       
       ClearText(selectionToDisplay);
       
@@ -503,6 +485,7 @@ Commands AwaitInput(int FramesToWait)
   int i = 0;
   while (i < FramesToWait)
   {
+    //fillOverTime(PendingColor, i, FramesToWait);
 
     if(digitalRead(PrimaryInput) == LOW) //No Input
     {
@@ -513,18 +496,11 @@ Commands AwaitInput(int FramesToWait)
     else if(digitalRead(PrimaryInput) == HIGH) //Input Detected
     {
       int t = 0;
-      // Fill along the length of the strip in various colors...
-      
-      //strip.setPixelColor(1, 0, 255, 0);
-      strip.clear();
-      colorWipe(strip.Color(  25, 25, 25), 25); // Green
-      strip.show();
-
 
       digitalWrite(LED_BUILTIN, HIGH);
-      while(t <= 1000 && digitalRead(PrimaryInput) == HIGH)
+      while(t <= longInputDelay && digitalRead(PrimaryInput) == HIGH)
       {
-        
+        fillOverTime(PendingColor, t, FramesToWait);
         t += 1;
         delay(1);
       }
@@ -533,7 +509,7 @@ Commands AwaitInput(int FramesToWait)
       strip.clear();
       strip.show();
 
-      if(t >= 1000)
+      if(t >= longInputDelay)
       {
         DisplayText(" --Back--");
         colorWipe(strip.Color(  255, 0,   0), 25); // Green\
@@ -591,14 +567,18 @@ void RemoveCursor()
 
 void ShortenDelay()
 {
-  shortDelay -=100;
-  longDelay -=100;
+  shortInputDelay -=200;
+  longInputDelay -=200;
+  cycleSpeed *= 0.9;
+  Serial.println(cycleSpeed);
 }
 
 void IncreaseDelay()
 {
-  shortDelay += 200;
-  longDelay += 200;
+  shortInputDelay += 400;
+  longInputDelay += 400;
+  cycleSpeed *= 1.2;
+  Serial.println(cycleSpeed);
 }
 
 
@@ -642,4 +622,41 @@ void colorWipe(uint32_t color, int wait) {
     strip.show();                          //  Update strip to match
     delay(wait);                           //  Pause for a moment
   }
+}
+
+void theaterChaseRainbow(int wait) {
+  int firstPixelHue = 0;     // First pixel starts at red (hue 0)
+  for(int a=0; a<30; a++) {  // Repeat 30 times...
+    for(int b=0; b<3; b++) { //  'b' counts from 0 to 2...
+      strip.clear();         //   Set all pixels in RAM to 0 (off)
+      // 'c' counts up from 'b' to end of strip in increments of 3...
+      for(int c=b; c<strip.numPixels(); c += 3) {
+        // hue of pixel 'c' is offset by an amount to make one full
+        // revolution of the color wheel (range 65536) along the length
+        // of the strip (strip.numPixels() steps):
+        int      hue   = firstPixelHue + c * 65536L / strip.numPixels();
+        uint32_t color = strip.gamma32(strip.ColorHSV(hue)); // hue -> RGB
+        strip.setPixelColor(c, color); // Set pixel 'c' to value 'color'
+      }
+      strip.show();                // Update strip with new contents
+      delay(wait);                 // Pause for a moment
+      firstPixelHue += 65536 / 90; // One cycle of color wheel over 90 frames
+    }
+  }
+}
+
+void fillOverTime(uint32_t color, int currentTime, int maxTime)
+{
+  int numToFill = 1 + ((float)currentTime/(float)maxTime) * ((strip.numPixels() - 1));
+  Serial.println(numToFill);
+
+  strip.clear();
+  for(int i=0; i<numToFill; i++) { // For each pixel in strip...
+    strip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
+  }                   //  Pause for a moment
+  
+  strip.show();                          //  Update strip to match       
+
+
+
 }
