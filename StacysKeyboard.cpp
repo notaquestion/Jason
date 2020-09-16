@@ -161,11 +161,21 @@ char LetterClumps[6][6] = {
 {'P', 'X', '6', '7', '8', '9'}
 };
 
+String LetterClumpsS[7] = {
+  {"_/E/T/S/D/W"},
+  {"O/H/I/L/F/K"},
+  {"A/N/U/G/V/Z"},
+  {"R/Y/C/J/1/2"},
+  {"M/B/Q/3/4/5"},
+  {"P/X/6/7/8/9"},
+  {"./?/,/+/!"}
+};
+
 
 char CurrentCharChoices[6];
 
 int cycleSpeed = 3000;
-int GoBackHoldTime = 3500;
+int GoBackHoldTime = 1500;
 int inputDelay = 5;
 
 const int PrimaryInput = 2;
@@ -209,7 +219,7 @@ void setup() { // initialize the buttons' inputs:
 
 void loop() {
 
-   Commands doWhat;
+    Commands doWhat;
     
     delay(1);
 
@@ -289,109 +299,22 @@ void loop() {
             }
          }
     }
+
     else if(CurrentMenu == "Type Letter")
     {
-      AddCurrsor();
+      //(String[] options, int size, String seperator, String goBackMenu)
+      String TypeWhat = DispalyGridOptionsAndType(LetterClumpsS, 7, '/', "KeyboardMenu");
 
-      for(int g = 0; g < 6; ++g)
+      if(TypeWhat != "")
       {
-        Keyboard.write(' ');
-        Keyboard.write('>');
-        
-       
-         for(int i = 0; i < 6; ++i)
-         {
-             Keyboard.write(LetterClumps[g][i]);
-             CurrentCharChoices[i] = LetterClumps[g][i];
-         }
-          Keyboard.write('<');
-          Keyboard.write(' ');
-         doWhat = AwaitInput(cycleSpeed);
-         for(int b = 0; b < 10; ++b)//Delete cursor and letter choices
-         {
-           Keyboard.write(KEY_BACKSPACE);
-         }
-
-         if(doWhat == Select1)
-         {
-            CurrentMenu = "Type Letter Specific";
-
-            g = 6;
-         }
-         else if(doWhat == Back)
-         {
-          CurrentMenu = "KeyboardMenu";
-
-            g = 6;
-         }
+        delay(1000);
+        DisplayText(TypeWhat);
+        CurrentMenu = "KeyboardMenu";
       }
-      RemoveCursor();
     }
 
-    else if(CurrentMenu == "Type Letter Specific")
-    {
-      AddCurrsor();
-
-      char charToType = '\0';
-      Keyboard.write('>');
-      for(int i = 0; i < 6 && charToType == '\0'; ++i)
-      {
-        for(int j = 0; j < 6 ; ++j)
-        {
-          if(j == i)
-          {
-            Keyboard.write(' ');
-            Keyboard.write('|');
-            Keyboard.write(CurrentCharChoices[i]);
-            Keyboard.write('|');
-            Keyboard.write(' ');
-            
-          }
-          else
-          {
-            Keyboard.write(CurrentCharChoices[j]);
-          }
-        }
-        Keyboard.write('<');
-        //Keyboard.write(CurrentCharChoices[i]);
-        doWhat = AwaitInput(cycleSpeed);
-
-        if(doWhat == Select1)
-        {
-          charToType =  CurrentCharChoices[i];
-
-          CurrentMenu = "KeyboardMenu";
-          CurrentSelection = "";
-        }
-        else if(doWhat == Back)
-        {
-           CurrentMenu = "Type Letter";
-           i = 6;
-        }
-        for(int d = 0; d < 11 ; ++d)
-        {
-          Keyboard.write(KEY_BACKSPACE);
-        }
-      }
-      
-      Keyboard.write(KEY_BACKSPACE);
-      RemoveCursor();
-      if(charToType != '\0')
-       {
-        if(charToType == '_')
-        {
-          Keyboard.write(' ');
-        }
-        else
-        {
-          Keyboard.write(charToType);
-        }
-        charToType = '\0';
-       }
-       
-    }
     
-
+    
     else if(CurrentMenu == "SpecialKeyMenu")
     {
       doWhat = DisplayMenuOptions(SpecialKeyMenu);
@@ -481,62 +404,8 @@ void loop() {
     }
     else if(CurrentMenu == "MouseMenu")
     {
-      
-      //doWhat = AwaitInput(1);
-
-      float MouseSpeed = 4;
-      int MoveDelay = 500;
-      int Moves = 6;
-      bool xDirection = false;
-
-      float xMax = MouseSpeed * (float)cos(MouseTimer);
-      float yMax = MouseSpeed * (float)sin(MouseTimer);
-
-      int xMove = (round(xMax));
-      int yMove = (round(yMax));
-
-      Mouse.move(xMove, yMove);
-      delay(70);
-
-      int heldTime = 0;
-      if(digitalRead(PrimaryInput))
-      {
-
-        while(digitalRead(PrimaryInput) && heldTime < MoveDelay)
-        {
-          ++heldTime;
-          delay(1);
-        }
-        
-        if(heldTime >= MoveDelay)
-        {
-          heldTime = 0;
-          while(digitalRead(PrimaryInput))
-          {
-            Mouse.move(heldTime * 0.1 * xMove, heldTime * 0.1 * yMove);
-            delay(50);
-            ++heldTime;
-            fillOverTime(PendingColor, heldTime, 100);
-          }
-
-          if(heldTime > 100)
-          {
-            CurrentMenu = "MainMenuContent";
-          }
-        }
-        else
-        {
-          colorWipe(ConfirmColor, 25);
-          Mouse.click(MOUSE_LEFT);
-        }
-      }
-
-      if(!digitalRead(PrimaryInput))
-      {
-        MouseTimer += 0.1;
-      }
+      MouseFunctions();
     }
-    
 }
 
 
@@ -594,7 +463,152 @@ Commands DisplayMenuOptions(String menu_[])
     return doWhat;
 }
 
+String DispalyGridOptionsAndType(String options[], int size, char seperator, String goBackMenu)
+{
+  String selection = "";
+    AddCurrsor();
 
+    for(int g = 0; g < size; ++g)
+    {
+        DisplayText(" >");
+        DisplayText(options[g]);
+        DisplayText("<");
+
+        Commands doWhatNow = AwaitInput(cycleSpeed);
+        
+        ClearText(" >");
+        ClearText(options[g]);
+        ClearText("<");
+
+        if(doWhatNow == Select1)
+        {
+            selection = ParseStringAndPresentOptions(options[g], seperator);
+           
+           if(selection == "")
+           {
+            //We wanted to go back.
+            g = -1; //This'll become 0 in the next go round.
+           }
+           else
+           {
+            g = size;
+            //delay(3000);
+           }
+
+        }
+        else if(doWhatNow == Back)
+        {
+          CurrentMenu = goBackMenu;
+          //g = size;
+          RemoveCursor();
+          return "";
+        }
+    }
+    RemoveCursor();
+
+    if(selection != "")
+    {
+      //DisplayText(selection);
+      return selection;
+    }
+}
+
+String ParseStringAndPresentOptions(String parseMe, char seperator)
+{
+  String GridSelection;
+  Commands doWhatNow;
+
+  int c = 0;
+  String chocies[10];
+
+  int p = 0;
+  String CurrentString = "";
+
+  while(parseMe[p] != '\0' && c < 10)
+  {
+    if(parseMe[p] == seperator)
+    {
+      chocies[c] = CurrentString;
+      ++c;
+      CurrentString = "";
+    }
+    else
+    {
+      CurrentString += parseMe[p];
+    }
+
+    if(parseMe[p + 1] == '\0')
+    {
+      chocies[c] = CurrentString;
+      ++c;
+      CurrentString = "";
+    }
+
+    ++p;
+  }
+  
+
+  // for(int s = 0; s < c; ++s) //We're going to offer you the choice of each thing in choices[]. 
+  // {
+  int s = 0;
+  while(true)
+  {
+    DisplayText("<");
+    for(int w = 0; w < c; ++w) //We're going to write each option in choices.
+    {
+      if(s == w)
+      {
+            DisplayText(" |");
+            DisplayText(chocies[w]);
+            DisplayText("| ");
+      }
+      else
+      {
+        DisplayText(chocies[w]);
+      }
+      // Keyboard.write(options[g][L]);
+    }
+    DisplayText("<");
+
+    doWhatNow = AwaitInput(cycleSpeed);
+
+    if(doWhatNow == Select1)
+    {
+      GridSelection =  chocies[s];
+
+      CurrentMenu = "KeyboardMenu";
+      CurrentSelection = "";
+      s = c;
+    }
+    else if(doWhatNow == Back)
+    {
+       GridSelection = "";
+       s = c;
+    }
+
+    ClearText("> ||<");
+    for(int clearWord = 0; clearWord < c; ++clearWord) //We're going to clear
+    {
+      ClearText(chocies[clearWord]);
+    }
+
+    ++s;
+    if(s == c)
+      s = 0;
+
+    if(doWhatNow == Select1 || doWhatNow == Back)
+    {
+      return GridSelection;
+    }
+
+    // for(int d = 0; d < 11 ; ++d)
+    // {
+    //   Keyboard.write(KEY_BACKSPACE);
+    // }
+
+
+  }
+}
 
 Commands AwaitInput(int FramesToWait)
 {
@@ -777,32 +791,61 @@ void CycleSpeedOptions()
   }
 }
 
-void MoveMouse()
+void MouseFunctions()
 {
-   /*
-    for(int i = 0; i < 300; ++i)
-    {
-       Mouse.move(-1, 0);
-       delay(1);
-    }
-    delay(1000);
+  //doWhat = AwaitInput(1);
 
-    for(int i = 0; i < 400; ++i)
-    {
-       Mouse.move(0, 1);
-       delay(1);
-    }
-    delay(1000);
+      float MouseSpeed = 4;
+      int MoveDelay = 500;
+      int Moves = 6;
+      bool xDirection = false;
 
-    for(int i = 0; i < 500; ++i)
-    {
-       Mouse.move(1, -1);
-       delay(1);
-    }
-    delay(1000);
-    
-   // Mouse.click(MOUSE_LEFT);
-   */
+      float xMax = MouseSpeed * (float)cos(MouseTimer);
+      float yMax = MouseSpeed * (float)sin(MouseTimer);
+
+      int xMove = (round(xMax));
+      int yMove = (round(yMax));
+
+      Mouse.move(xMove, yMove);
+      delay(70);
+
+      int heldTime = 0;
+      if(digitalRead(PrimaryInput))
+      {
+
+        while(digitalRead(PrimaryInput) && heldTime < MoveDelay)
+        {
+          ++heldTime;
+          delay(1);
+        }
+        
+        if(heldTime >= MoveDelay)
+        {
+          heldTime = 0;
+          while(digitalRead(PrimaryInput))
+          {
+            Mouse.move(heldTime * 0.1 * xMove, heldTime * 0.1 * yMove);
+            delay(50);
+            ++heldTime;
+            fillOverTime(PendingColor, heldTime, 100);
+          }
+
+          if(heldTime > 100)
+          {
+            CurrentMenu = "MainMenuContent";
+          }
+        }
+        else
+        {
+          colorWipe(ConfirmColor, 25);
+          Mouse.click(MOUSE_LEFT);
+        }
+      }
+
+      if(!digitalRead(PrimaryInput))
+      {
+        MouseTimer += 0.1;
+      }
 }
 
 // Fill strip pixels one after another with a color. Strip is NOT cleared
