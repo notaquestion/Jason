@@ -69,87 +69,88 @@ String MenuDepths[5];
 int CurrentMenuDepth = 0;
 
 String MainMenuContent[] = {
-  "MouseMenu",
   "KeyboardMenu",
+  // "CommonWordMenu",
+  // "StacyWordMenu",
+  "MouseMenu",
   "OptionsMenu",
   "End"
 };
 
-String SpecialKeyMenu[] = {
-  "Enter",
-  "Tab",
-  // "LeftArrow",
-  // "RightArrow",
-  // "UpArrow",
-  // "DownArrow",
-  // "CapsLock",
-  //Home, End, INS, DEL, TAB, ALT (Select Once for Press, 2x for hold)
-  "End"
-};
+    String KeyboardMenu[] = {
+      "Type Letter",
+      "BackSpace",
+      "SpecialKeyMenu",
+      "End"
+    };
 
-String OptionsMenu[] = {
-  "FasterCycleSpeed",
-  "LongerCycleSpeed",
-  "ShorterGoBackInput",
-  "LongerGoBackInput",
-  "End"
-};
+      String SpecialKeyMenu[] = {
+        "Enter",
+        "Tab",
+        // "LeftArrow",
+        // "RightArrow",
+        // "UpArrow",
+        // "DownArrow",
+        // "CapsLock",
+        //Home, End, INS, DEL, TAB, ALT (Select Once for Press, 2x for hold)
+        "End"
+      };
+
+    String OptionsMenu[] = {
+      "FasterCycleSpeed",
+      "LongerCycleSpeed",
+      "ShorterGoBackInput",
+      "LongerGoBackInput",
+      "End"
+    };
+
+// String SymbolMenu[] = {
+//   ".",
+//   ",",
+//   "?",
+//   "!", 
+//   "@",
+//   "#",
+//   "$",
+//   "%",
+//   "^",
+//   "&",
+//   "*",
+//   "(",
+//   ")",
+//   "-",
+//   "_",
+//   "+",
+//   "=",
+//   "/", 
+//   "End"
+// };
+
+// //Long press to go back should be disabled in mouse menu
+// String MouseMenu[] = {
+//   "Same As Last",
+//   "Back Menu",
+//   "Up",
+//   "Down",
+//   "Left",
+//   "Right",
+//   "L-Click",
+//   "R-Click",
+//   "M-Click",
+//   "Scroll Up",
+//   "Scroll Down",
+//   "Sensitivity Up",
+//   "Sensitivikty Down",
+//   "End"
+// };
 
 
-String SymbolMenu[] = {
-  ".",
-  ",",
-  "?",
-  "!", 
-  "@",
-  "#",
-  "$",
-  "%",
-  "^",
-  "&",
-  "*",
-  "(",
-  ")",
-  "-",
-  "_",
-  "+",
-  "=",
-  "/", 
-  "End"
-};
 
-String KeyboardMenu[] = {
-  "Type Letter",
-  "BackSpace",
-  "SpecialKeyMenu",
-  "End"
-};
 
-//Long press to go back should be disabled in mouse menu
-String MouseMenu[] = {
-  "Same As Last",
-  "Back Menu",
-  "Up",
-  "Down",
-  "Left",
-  "Right",
-  "L-Click",
-  "R-Click",
-  "M-Click",
-  "Scroll Up",
-  "Scroll Down",
-  "Sensitivity Up",
-  "Sensitivikty Down",
-  "End"
-};
 
 
 
 //eotha sinrd luymw fgcbp kvjqxz
-
-char LettersByFrequency[] = {
-  'e', 'o', 't', 'h', 'a', 's', 'i', 'n', 'r', 'd', 'l', 'u', 'y', 'm', 'w', 'f', 'g', 'c', 'b', 'p', 
-  'k', 'v', 'j', 'q', 'x', 'z'};
 
 char LetterClumps[6][6] = {
 {'_', 'E', 'T', 'S', 'D', 'W'},
@@ -164,7 +165,7 @@ char LetterClumps[6][6] = {
 char CurrentCharChoices[6];
 
 int cycleSpeed = 3000;
-int longInputDelay = 3500;
+int GoBackHoldTime = 3500;
 int inputDelay = 5;
 
 const int PrimaryInput = 2;
@@ -483,7 +484,7 @@ void loop() {
       
       //doWhat = AwaitInput(1);
 
-      float MouseSpeed = 2;
+      float MouseSpeed = 4;
       int MoveDelay = 500;
       int Moves = 6;
       bool xDirection = false;
@@ -619,9 +620,9 @@ Commands AwaitInput(int FramesToWait)
       int t = 0;
 
       digitalWrite(LED_BUILTIN, HIGH);
-      while(t <= longInputDelay && digitalRead(PrimaryInput) == HIGH)
+      while(t <= GoBackHoldTime && digitalRead(PrimaryInput) == HIGH)
       {
-        fillOverTime(PendingColor, t, longInputDelay);
+        fillOverTime(PendingColor, t, GoBackHoldTime);
         t += 1;
         delay(1);
       }
@@ -630,7 +631,7 @@ Commands AwaitInput(int FramesToWait)
       strip.clear();
       strip.show();
 
-      if(t >= longInputDelay)
+      if(t >= GoBackHoldTime)
       {
         DisplayText(" --Back-- ");
         colorWipe(GoBackColor, 25); 
@@ -692,8 +693,8 @@ void RemoveCursor()
 
 void ShortenDelay()
 {
-  longInputDelay -= 250;
-  String message = String("  --  Hold Time for Back: " + String(longInputDelay));
+  GoBackHoldTime -= 250;
+  String message = String("  --  Hold Time for Back: " + String(GoBackHoldTime));
   DisplayText(message);
   delay(2000);
   ClearText(message);
@@ -702,8 +703,8 @@ void ShortenDelay()
 
 void IncreaseDelay()
 {
-  longInputDelay += 500;
-  String message = String("  --  Hold Time For Back: " + String(longInputDelay));
+  GoBackHoldTime += 500;
+  String message = String("  --  Hold Time For Back: " + String(GoBackHoldTime));
   DisplayText(message);
   delay(2000);
   ClearText(message);
@@ -745,8 +746,8 @@ void CycleSpeedOptions()
 
     if(t >= 200)
     {
-      longInputDelay = t;
-      String message = String("  --  Hold Time for Back: " + String(longInputDelay));
+      GoBackHoldTime = t;
+      String message = String("  --  Hold Time for Back: " + String(GoBackHoldTime));
       DisplayText(message);
       delay(2000);
       ClearText(message);
