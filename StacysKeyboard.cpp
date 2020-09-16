@@ -615,6 +615,7 @@ Commands AwaitInput(int FramesToWait)
     }
     else if(digitalRead(PrimaryInput) == HIGH && hasBeenFalse) 
     {
+      Serial.print("TouchStarted:"); Serial.println(FramesToWait);
       int t = 0;
 
       digitalWrite(LED_BUILTIN, HIGH);
@@ -634,6 +635,7 @@ Commands AwaitInput(int FramesToWait)
         DisplayText(" --Back-- ");
         colorWipe(GoBackColor, 25); 
         strip.show();
+        Serial.print("Back:"); Serial.println(t);
         delay(500);
         ClearText(" --Back-- ");
         
@@ -647,6 +649,7 @@ Commands AwaitInput(int FramesToWait)
         DisplayText(String(t));
         colorWipe(ConfirmColor, 25); 
         strip.show();
+        Serial.print("Select:"); Serial.println(t);
         delay(500);
         ClearText(String(t));
         ClearText(" --Selected-- ");
