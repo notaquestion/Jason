@@ -70,7 +70,7 @@ int CurrentMenuDepth = 0;
 
 String MainMenuContent[] = {
   "KeyboardMenu",
-  "CommonWordMenu",
+  "StacyWordsMenu",
   // "StacyWordMenu",
   "MouseMenu",
   "OptionsMenu",
@@ -142,7 +142,7 @@ String MainMenuContent[] = {
 //   "Sensitivity Up",
 //   "Sensitivikty Down",
 //   "End"
-// };
+// }; 
 
 
 
@@ -171,11 +171,57 @@ String LetterClumpsS[7] = {
   {"./?/,/+/!"}
 };
 
-String CommonWords[3] = {
-  " and / the / are / is",
-  " my / your / our/ their",
-  "Jason / Is / Coding / Too / Late"
+
+    String StacyWordsMenu[] = {
+      "Words_Verbs",
+      "Words_Things",
+      "Words_Fun",
+      "Words_Foods",
+      "Words_Body",
+      "Words_Adjectives",
+      "Words_People",
+      "End"
+    };
+//
+
+String Words_Verbs[2] = {
+  "Want/Went/Saw/Find/Turn/Go",
+  "Like/Love/Hurt/Play/Write"
 };
+
+String Words_Things[1] = {
+  "Wheelchair/Bed/Sheet/Pillow/Van"
+};
+
+String Words_Fun[4] = {
+  "Games/Tangelo/Steam/Computer/Movie",
+  "Concert/Drama/Action/Comedy/TV series",
+  "Tangelo/Letters/Words",
+  "Adventure Capatalist/Hidden Object/Jigwords"
+};
+
+
+String Words_Foods[3] = {
+  "Macaroni/Lasagna/Cheeseburger/French fries",
+  "Burrito/Cake/Ice cream sandwich/Cookies",
+  "Drink straw/Lemonade water/Pineapple water"
+};
+
+String Words_Body[2] = {
+  "Arm/Fingers/Hand/Leg/Toes",
+  "Hips/Chest/Head/Neck"
+};
+
+String Words_Adjectives[1] = {
+  "Bad/Painful/Funny/Tired/New"
+};
+
+String Words_People[3] = {
+  "Mom/Dad/Nick/Gina/Jason/Daniel",
+  "Michael/Paul/Deonte/Amanda/Jose",
+  "Cherie/Monti/Mike/Marcy/Brandon"
+};
+
 
 char CurrentCharChoices[6];
 
@@ -304,7 +350,6 @@ void loop() {
             }
          }
     }
-
     else if(CurrentMenu == "Type Letter")
     {
       //(String[] options, int size, String seperator, String goBackMenu)
@@ -321,26 +366,6 @@ void loop() {
         CurrentMenu = "KeyboardMenu";
       }
     }
-
-    else if(CurrentMenu == "CommonWordMenu")
-    {
-      //(String[] options, int size, String seperator, String goBackMenu)
-      String TypeWhat = DispalyGridOptionsAndType(CommonWords, 3, '/', "KeyboardMenu");
-
-      if(TypeWhat == "_")
-      {
-        TypeWhat = " ";
-      }
-
-      if(TypeWhat != "")
-      {
-        DisplayText(TypeWhat);
-        CurrentMenu = "KeyboardMenu";
-      }
-    }
-
-    
-    
     else if(CurrentMenu == "SpecialKeyMenu")
     {
       doWhat = DisplayMenuOptions(SpecialKeyMenu);
@@ -428,8 +453,79 @@ void loop() {
             }
          }
     }
-    else if(CurrentMenu == "MouseMenu")
+    else if(CurrentMenu == "StacyWordsMenu")
     {
+      doWhat = DisplayMenuOptions(OptionsMenu);
+
+      if(doWhat == Back)
+      {
+       CurrentMenu = "MainMenuContent";
+      }
+    }
+      else if(CurrentMenu == "Words_Verbs") {
+        String TypeWhat = DispalyGridOptionsAndType(Words_Verbs, 2, '/', "StacyWordsMenu");
+
+        if(TypeWhat != "")
+        {
+          DisplayText(TypeWhat);
+          CurrentMenu = "KeyboardMenu";
+        } 
+      }
+      else if(CurrentMenu == "Words_Things") {
+        String TypeWhat = DispalyGridOptionsAndType(Words_Things, 1, '/', "StacyWordsMenu");
+
+        if(TypeWhat != "")
+        {
+          DisplayText(TypeWhat);
+          CurrentMenu = "KeyboardMenu";
+        }
+      }
+      else if(CurrentMenu == "Words_Fun") {
+        String TypeWhat = DispalyGridOptionsAndType(Words_Fun, 4, '/', "StacyWordsMenu");
+
+        if(TypeWhat != "")
+        {
+          DisplayText(TypeWhat);
+          CurrentMenu = "KeyboardMenu";
+        }
+      }
+      else if(CurrentMenu == "Words_Foods") {
+        String TypeWhat = DispalyGridOptionsAndType(Words_Foods, 3, '/', "StacyWordsMenu");
+
+        if(TypeWhat != "")
+        {
+          DisplayText(TypeWhat);
+          CurrentMenu = "KeyboardMenu";
+        }
+      }
+      else if(CurrentMenu == "Words_Body") {
+        String TypeWhat = DispalyGridOptionsAndType(Words_Body, 2, '/', "StacyWordsMenu");
+
+        if(TypeWhat != "")
+        {
+          DisplayText(TypeWhat);
+          CurrentMenu = "KeyboardMenu";
+        }
+      }
+      else if(CurrentMenu == "Words_Adjectives") {
+        String TypeWhat = DispalyGridOptionsAndType(Words_Adjectives, 1, '/', "StacyWordsMenu");
+
+        if(TypeWhat != "")
+        {
+          DisplayText(TypeWhat);
+          CurrentMenu = "KeyboardMenu";
+        }
+      }
+      else if(CurrentMenu == "Words_People") {
+        String TypeWhat = DispalyGridOptionsAndType(Words_People, 3, '/', "StacyWordsMenu");
+
+        if(TypeWhat != "")
+        {
+          DisplayText(TypeWhat);
+          CurrentMenu = "KeyboardMenu";
+        }
+      }
+    else if(CurrentMenu == "MouseMenu"){
       MouseFunctions();
     }
 }
@@ -826,7 +922,7 @@ void MouseFunctions()
 {
   //doWhat = AwaitInput(1);
 
-      float MouseSpeed = 4;
+      float MouseSpeed = 8;
       int MoveDelay = 500;
       int Moves = 6;
       bool xDirection = false;
