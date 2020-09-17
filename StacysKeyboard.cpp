@@ -70,7 +70,7 @@ int CurrentMenuDepth = 0;
 
 String MainMenuContent[] = {
   "KeyboardMenu",
-  // "CommonWordMenu",
+  "CommonWordMenu",
   // "StacyWordMenu",
   "MouseMenu",
   "OptionsMenu",
@@ -171,6 +171,11 @@ String LetterClumpsS[7] = {
   {"./?/,/+/!"}
 };
 
+String CommonWords[3] = {
+  " and / the / are / is",
+  " my / your / our/ their",
+  "Jason / Is / Coding / Too / Late"
+};
 
 char CurrentCharChoices[6];
 
@@ -305,9 +310,30 @@ void loop() {
       //(String[] options, int size, String seperator, String goBackMenu)
       String TypeWhat = DispalyGridOptionsAndType(LetterClumpsS, 7, '/', "KeyboardMenu");
 
+      if(TypeWhat == "_")
+      {
+        TypeWhat = " ";
+      }
+
       if(TypeWhat != "")
       {
-        delay(1000);
+        DisplayText(TypeWhat);
+        CurrentMenu = "KeyboardMenu";
+      }
+    }
+
+    else if(CurrentMenu == "CommonWordMenu")
+    {
+      //(String[] options, int size, String seperator, String goBackMenu)
+      String TypeWhat = DispalyGridOptionsAndType(CommonWords, 3, '/', "KeyboardMenu");
+
+      if(TypeWhat == "_")
+      {
+        TypeWhat = " ";
+      }
+
+      if(TypeWhat != "")
+      {
         DisplayText(TypeWhat);
         CurrentMenu = "KeyboardMenu";
       }
@@ -553,7 +579,7 @@ String ParseStringAndPresentOptions(String parseMe, char seperator)
   int s = 0;
   while(true)
   {
-    DisplayText("<");
+    DisplayText(">");
     for(int w = 0; w < c; ++w) //We're going to write each option in choices.
     {
       if(s == w)
@@ -565,6 +591,7 @@ String ParseStringAndPresentOptions(String parseMe, char seperator)
       else
       {
         DisplayText(chocies[w]);
+        //DisplayText("/");
       }
       // Keyboard.write(options[g][L]);
     }
@@ -586,10 +613,14 @@ String ParseStringAndPresentOptions(String parseMe, char seperator)
        s = c;
     }
 
-    ClearText("> ||<");
+    ClearText("> || <");
     for(int clearWord = 0; clearWord < c; ++clearWord) //We're going to clear
     {
       ClearText(chocies[clearWord]);
+      // if(clearWord != s)
+      // {
+      //   ClearText("/");
+      // }
     }
 
     ++s;
