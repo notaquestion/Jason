@@ -455,7 +455,7 @@ void loop() {
     }
     else if(CurrentMenu == "StacyWordsMenu")
     {
-      doWhat = DisplayMenuOptions(OptionsMenu);
+      doWhat = DisplayMenuOptions(StacyWordsMenu);
 
       if(doWhat == Back)
       {
