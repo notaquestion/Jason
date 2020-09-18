@@ -29,6 +29,8 @@
 #include "Keyboard.h"
 #include "Mouse.h"
 
+#include <avr/pgmspace.h>
+
 // Which pin on the Arduino is connected to the NeoPixels?
 // On a Trinket or Gemma we suggest changing this to 1:
 #define LED_PIN    3
@@ -184,43 +186,50 @@ String LetterClumpsS[7] = {
     };
 //
 
-String Words_Verbs[2] = {
-  "Want/Went/Saw/Find/Turn/Go",
-  "Like/Love/Hurt/Play/Write"
-};
-
-String Words_Things[1] = {
-  "Wheelchair/Bed/Sheet/Pillow/Van"
-};
-
-String Words_Fun[4] = {
-  "Games/Tangelo/Steam/Computer/Movie",
-  "Concert/Drama/Action/Comedy/TV series",
-  "Tangelo/Letters/Words",
-  "Adventure Capatalist/Hidden Object/Jigwords"
-};
 
 
-String Words_Foods[3] = {
-  "Macaroni/Lasagna/Cheeseburger/French fries",
-  "Burrito/Cake/Ice cream sandwich/Cookies",
-  "Drink straw/Lemonade water/Pineapple water"
-};
+const char Words_Verbs_0[] PROGMEM =  "Want/Went/Saw/Find/Turn/Go";
+const char Words_Verbs_1[] PROGMEM =  "Like/Love/Hurt/Play/Write";
+const char *const Words_Verbs[] PROGMEM = {};
+const int Words_Verbs_SIZE = 2;
 
-String Words_Body[2] = {
-  "Arm/Fingers/Hand/Leg/Toes",
-  "Hips/Chest/Head/Neck"
-};
 
-String Words_Adjectives[1] = {
-  "Bad/Painful/Funny/Tired/New"
-};
+const char Words_Things_0[] PROGMEM =  "Wheelchair/Bed/Sheet/Pillow/Van"
+const char *const Words_Things[] PROGMEM = {};
+const int Words_Things_0_SIZE = 1;
 
-String Words_People[3] = {
-  "Mom/Dad/Nick/Gina/Jason/Daniel",
-  "Michael/Paul/Deonte/Amanda/Jose",
-  "Cherie/Monti/Mike/Marcy/Brandon"
-};
+
+const char Words_Fun_0[] PROGMEM =  "Games/Tangelo/Steam/Computer/Movie";
+const char Words_Fun_1[] PROGMEM =  "Concert/Drama/Action/Comedy/TV series";
+const char Words_Fun_2[] PROGMEM =  "Tangelo/Letters/Words";
+const char Words_Fun_3[] PROGMEM =  "Adventure Capatalist/Hidden Object/Jigwords";
+const char *const Words_Fun[] PROGMEM = {};
+const int Words_Fun_SIZE = 4;
+
+
+const char Words_Foods_0[] PROGMEM =  "Macaroni/Lasagna/Cheeseburger/French fries";
+const char Words_Foods_1[] PROGMEM =  "Burrito/Cake/Ice cream sandwich/Cookies";
+const char Words_Foods_2[] PROGMEM =  "Drink straw/Lemonade water/Pineapple water";
+const char *const Words_Foods[] PROGMEM = {};
+const int Words_Foods_SIZE = 3;
+
+
+const char Words_Body_0[] PROGMEM =  "Arm/Fingers/Hand/Leg/Toes";
+const char Words_Body_1[] PROGMEM =  "Hips/Chest/Head/Neck";
+const char *const Words_Body[] PROGMEM = {};
+const int Words_Body_SIZE = 2;
+
+
+const char Words_Adjectives_0[] PROGMEM =  "Bad/Painful/Funny/Tired/New";
+const char *const Words_Adjectives[] PROGMEM = {};
+const int Words_Adjectives_SIZE = 1;
+
+
+const char Words_People_0[] PROGMEM =  "Mom/Dad/Nick/Gina/Jason/Daniel";
+const char Words_People_1[] PROGMEM =  "Michael/Paul/Deonte/Amanda/Jose";
+const char Words_People_2[] PROGMEM =  "Cherie/Monti/Mike/Marcy/Brandon";
+const char *const Words_People[] PROGMEM = {};
+const int Words_People_SIZE = 3;
 
 
 char CurrentCharChoices[6];
@@ -973,6 +982,15 @@ void MouseFunctions()
       {
         MouseTimer += 0.1;
       }
+}
+
+char buffer[100];
+String RetriveString(char StoredString[])
+{
+  strcpy_P(buffer, (char *)pgm_read_word(&(StoredString)));  // Necessary casts and dereferencing, just copy.
+  DisplayText("Buffer ");
+  DisplayText(buffer);
+  return buffer;
 }
 
 // Fill strip pixels one after another with a color. Strip is NOT cleared
