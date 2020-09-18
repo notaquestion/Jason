@@ -75,6 +75,7 @@ String MainMenuContent[] = {
   "StacyWordsMenu",
   // "StacyWordMenu",
   "MouseMenu",
+  "MouseMenuLinear",
   "OptionsMenu",
   "End"
 };
@@ -501,6 +502,9 @@ void loop() {
     else if(CurrentMenu == "MouseMenu"){
       MouseFunctions();
     }
+    else if(CurrentMenu == "MouseMenuLinear"){
+      MouseFunctionLinear();
+    }
 }
 
 
@@ -902,18 +906,19 @@ void MouseFunctions()
 {
   //doWhat = AwaitInput(1);
 
-      float MouseSpeed = 10;
+      int CircleSpeed = 300;
+      float CircleSize = 10;
       int MoveDelay = 500;
       bool xDirection = false;
 
-      float xMax = MouseSpeed * (float)cos(MouseTimer);
-      float yMax = MouseSpeed * (float)sin(MouseTimer);
+      float xMax = CircleSize * (float)cos(MouseTimer);
+      float yMax = CircleSize * (float)sin(MouseTimer);
 
       int xMove = (round(xMax));
       int yMove = (round(yMax));
 
       Mouse.move(xMove, yMove);
-      delay(300);
+      delay(CircleSpeed);
 
       int heldTime = 0;
       if(digitalRead(PrimaryInput))
@@ -925,13 +930,13 @@ void MouseFunctions()
           delay(1);
         }
         
-        if(heldTime >= MoveDelay)
+        if(heldTime >= MoveDelay) //Should we start moving or Click?
         {
           heldTime = 0;
           while(digitalRead(PrimaryInput))
           {
             Mouse.move(heldTime * 0.1 * xMove, heldTime * 0.1 * yMove);
-            delay(500);
+            delay(100);
             ++heldTime;
             fillOverTime(PendingColor, heldTime, 1000);
           }
@@ -952,6 +957,84 @@ void MouseFunctions()
       {
         MouseTimer += 0.1;
       }
+}
+
+float MouseMoveIteration = 0.0;
+void MouseFunctionLinear()
+{
+    int CrossSpeed = 30;
+    float CrossSize = 70;
+    int MoveDelay = 500;
+    bool xDirection = false;
+
+    int xMove = 0;
+    int yMove = 0;
+
+    if(MouseMoveIteration >= 0 && MouseMoveIteration < CrossSize)
+    {
+      xMove = 1; yMove = 0;
+    }
+    else if( MouseMoveIteration > CrossSize && MouseMoveIteration < (2 * CrossSize))
+    {
+      xMove = -1; yMove = 0;
+    }
+    else if( MouseMoveIteration > (2 * CrossSize) && MouseMoveIteration < (3 * CrossSize))
+    {
+      xMove = 0; yMove = 1;
+    }
+    else if( MouseMoveIteration > (3 * CrossSize) && MouseMoveIteration < (4 * CrossSize))
+    {
+      xMove = 0; yMove = -1;
+    }
+
+    MouseMoveIteration += 1.0;
+    if(MouseMoveIteration >= ( 4 * CrossSize))
+    {
+      MouseMoveIteration = 0;
+    }
+
+    Mouse.move(xMove, yMove);
+    delay(CrossSpeed);
+
+    int heldTime = 0;
+    if(digitalRead(PrimaryInput))
+    {
+
+      while(digitalRead(PrimaryInput) && heldTime < MoveDelay)
+      {
+        ++heldTime;
+        delay(1);
+      }
+      
+      if(heldTime >= MoveDelay) //Should we start moving or Click?
+      {
+        heldTime = 0;
+        while(digitalRead(PrimaryInput))
+        {
+          Mouse.move(heldTime * 0.3 * xMove, heldTime * 0.3 * yMove);
+          delay(50);
+          ++heldTime;
+          fillOverTime(PendingColor, heldTime, 1000);
+        }
+
+        if(heldTime > 1000)
+        {
+          CurrentMenu = "MainMenuContent";
+        }
+        MouseMoveIteration = 0;
+      }
+      else
+      {
+        colorWipe(ConfirmColor, 25);
+        Mouse.click(MOUSE_LEFT);
+        MouseMoveIteration = 0;
+      }
+    }
+
+    if(!digitalRead(PrimaryInput))
+    {
+      MouseTimer += 0.1;
+    }
 }
 
 char buffer[100];
