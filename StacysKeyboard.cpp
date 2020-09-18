@@ -83,6 +83,7 @@ String MainMenuContent[] = {
     String KeyboardMenu[] = {
       "Type Letter",
       "BackSpace",
+      "AutoComplete",
       "SpecialKeyMenu",
       "End"
     };
@@ -134,6 +135,7 @@ const char *const LetterClumps[] PROGMEM = {LetterClumps_1, LetterClumps_2, Lett
 const int LetterClumps_SIZE = 7;
 
 
+
     String StacyWordsMenu[] = {
       "Words_Verbs",
       "Words_Things",
@@ -145,6 +147,33 @@ const int LetterClumps_SIZE = 7;
       "End"
     };
 //
+
+String CurrentTypedWord = "";
+String AutoCompleteOptions = "";
+
+const char Words_A[] PROGMEM = "ABOUT/ACTION/ADVENTURE CAPATALIST/AFTER/ALSO/AMANDA";
+const char Words_B[] PROGMEM = "BACK/BECAUSE/BRANDON/BURRITO";
+const char Words_C[] PROGMEM = "CAKE/CHEESEBURGER/CHERIE/CHEST/COME/COMEDY/COMPUTER/CONCERT/COOKIES/COULD";
+const char Words_D[] PROGMEM = "DANIEL/DEONTE/DRAMA/DRINK STRAW";
+const char Words_E[] PROGMEM = "EVEN";
+const char Words_F[] PROGMEM = "FIND/FINGERS/FIRST/FRENCH FRIES/FROM/FUNNY";
+const char Words_G[] PROGMEM = "GAMES/GINA/GIVE/GOOD/GOOD";
+const char Words_H[] PROGMEM = "HAND/HAVE/HEAD/HIDDEN OBJECT/HIPS/HURT";
+const char Words_I[] PROGMEM = "ICE CREAM SANDWICH/INTO";
+const char Words_J[] PROGMEM = "JASON/JIGWORDS/JOSE/JUST";
+const char Words_K[] PROGMEM = "KNOW";
+const char Words_L[] PROGMEM = "LASAGNA/LEMONADE WATER/LETTERS/LIKE/LIKE/LOOK/LOVE";
+const char Words_M[] PROGMEM = "MACARONI/MAKE/MARCY/MICHAEL/MIKE/MONTI/MOST/MOVIE";
+const char Words_N[] PROGMEM = "NECK/NICK";
+const char Words_O[] PROGMEM = "ONLY/OTHER/OVER";
+const char Words_P[] PROGMEM = "PAINFUL/PAUL/PEOPLE/PILLOW/PINEAPPLE WATER/PLAY";
+const char Words_S[] PROGMEM = "SHEET/SOME/STEAM";
+const char Words_T[] PROGMEM = "TAKE/TANGELO/TANGELO/THAN/THAT/THEIR/THEM/THEN/THERE/THESE/THEY/THINK/THIS/TIME/TIRED/TOES/TURN/TV SERIES";
+const char Words_W[] PROGMEM = "WANT/WANT/WELL/WENT/WHAT/WHEELCHAIR/WHEN/WHICH/WILL/WITH/WORDS/WORK/WOULD/WRITE";
+const char Words_Y[] PROGMEM = "YEAR/YOUR";
+
+const char *const AutoSuggestDic[] PROGMEM = {Words_A, Words_B, Words_C, Words_D, Words_E, Words_F, Words_G, Words_H, Words_I, Words_J, Words_K, Words_L, Words_M, Words_N, Words_O, Words_P, Words_S, Words_T, Words_W, Words_Y, };
+const int AutoSuggestDic_SIZE = 20;
 
 
 
@@ -235,11 +264,15 @@ void setup() { // initialize the buttons' inputs:
   // strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   // strip.show();            // Turn OFF all pixels ASAP
   // strip.setBrightness(50); // Set BRIGHTNESS to about 1/5 (max = 255)
+
+  //PopulateAutoCompleteDicOptions();
 }
 
 void loop() {
 
     Commands doWhat;
+
+    
     
     delay(1);
 
@@ -251,7 +284,6 @@ void loop() {
 
       if(doWhat == Back)
       {
-
         CurrentMenu = "MainMenuContent";
         delay(500);
         // strip.clear();
@@ -296,11 +328,37 @@ void loop() {
             {
               Keyboard.write(KEY_BACKSPACE);
               CurrentSelection = "";
+
+              CurrentTypedWord.remove(CurrentTypedWord.length() - 1);
+              PopulateAutoCompleteDicOptions();
             }
-            // else if(CurrentSelection == "")
-            // {
-            //   CurrentSelection = "";
-            // }
+            else if(CurrentSelection == "AutoComplete")
+            {
+              if(AutoCompleteOptions.length() > 0)
+              {
+                String typeWhat = ParseStringAndPresentOptions(AutoCompleteOptions, '/');
+
+                if(typeWhat == "")
+                {
+                  CurrentMenu = "KeyboardMenu";
+                  CurrentSelection = "";
+                }
+                else
+                {
+                  ClearText(CurrentTypedWord);
+                  DisplayText(typeWhat);
+                  DisplayText(" ");
+                  AutoCompleteOptions = "";
+                  CurrentTypedWord = "";
+                }
+                CurrentSelection = "";
+              }
+              else
+              {
+                CurrentMenu = "KeyboardMenu";
+                CurrentSelection = "";
+              }
+            }
             
             // else if(CurrentSelection == "IncreaseDelay")
             // {
@@ -327,12 +385,24 @@ void loop() {
       if(TypeWhat == "_")
       {
         TypeWhat = " ";
+        CurrentTypedWord = "";
       }
 
       if(TypeWhat != "")
       {
+        CurrentTypedWord += TypeWhat;
         DisplayText(TypeWhat);
+
+        // DisplayText("       CurrentTypedWord:");
+        // DisplayText(CurrentTypedWord);
+        // delay(1000);
+        // ClearText("       CurrentTypedWord:");
+        // ClearText(CurrentTypedWord);
+
+
         CurrentMenu = "KeyboardMenu";
+
+        PopulateAutoCompleteDicOptions();
       }
     }
     else if(CurrentMenu == "SpecialKeyMenu")
@@ -592,7 +662,7 @@ String DispalyGridOptionsAndType(const char* options[], int size, char seperator
            }
            else
            {
-            g = size;
+            g = size ;
             //delay(3000);
            }
 
@@ -603,6 +673,11 @@ String DispalyGridOptionsAndType(const char* options[], int size, char seperator
           //g = size;
           RemoveCursor();
           return "";
+        }
+
+        if(g == (size - 1))
+        {
+          g = -1;
         }
     }
     RemoveCursor();
@@ -896,8 +971,8 @@ void CycleSpeedOptions()
       cycleSpeed = t;
       String message = String("  --  CycleSpeed: " + String(cycleSpeed));
       DisplayText(message);
-      delay(2000);
       ClearText(message);
+
     }
   }
 }
@@ -1042,6 +1117,104 @@ String RetriveString(const char* StoredString[])
 {
   strcpy_P(buffer, (char *)pgm_read_word(StoredString));  // Necessary casts and dereferencing, just copy.
   return buffer;
+}
+
+
+String PopulateAutoCompleteDicOptions()
+{
+  AutoCompleteOptions = "";
+  if(CurrentTypedWord.length() > 0)
+  {
+    bool flag = false;
+    char WordsStartingWith[105] = {0};
+    for(int a = 0; a < AutoSuggestDic_SIZE; ++a)
+    {
+      strcpy_P(WordsStartingWith, (char *)pgm_read_word(&(AutoSuggestDic[a])));
+
+      if(WordsStartingWith[0] == CurrentTypedWord[0])
+      {
+        a = AutoSuggestDic_SIZE;
+        flag = true;
+      }
+    }
+
+    int W = 0;
+    String currentWord;
+    int currentWordPlace = 0;
+    if(flag = true)
+    {
+      for (int i = 0; i < 105; ++i)
+      {
+        //delay(100);
+        /* code */
+        char newLetter = WordsStartingWith[i];
+        if(newLetter != 0)
+        {
+          if ('/' == newLetter)
+          {
+            if(currentWord.length() > 0)
+            {
+              //DisplayText(currentWord);
+              AutoCompleteOptions += currentWord;
+              AutoCompleteOptions += '/';
+              currentWord = "";
+              currentWordPlace = 0;
+            }
+          }
+          else if(newLetter == CurrentTypedWord[currentWordPlace] || currentWordPlace >= CurrentTypedWord.length())
+          {
+            currentWord += newLetter;
+            ++currentWordPlace;
+            // DisplayText(currentWord);
+            // DisplayText(" - ");
+          }
+          else
+          {
+            currentWord = "";
+            currentWordPlace = 0;
+          }
+        }
+        else
+        {
+          i = 105;
+        }
+      }
+    }
+    if(AutoCompleteOptions.length() > 0)
+    {
+      AutoCompleteOptions.remove(AutoCompleteOptions.length() - 1, 1);
+      DisplayText(" --- Auto Complete --- ");
+      DisplayText(AutoCompleteOptions);
+      delay(cycleSpeed);
+      Commands doWhatNow = AwaitInput(cycleSpeed);
+      ClearText(AutoCompleteOptions);
+      ClearText(" --- Auto Complete --- ");
+
+      if(doWhatNow == Select1)
+      {
+        String typeWhat = ParseStringAndPresentOptions(AutoCompleteOptions, '/');
+
+        if(typeWhat == "")
+        {
+          CurrentMenu = "KeyboardMenu";
+        }
+        else
+        {
+          ClearText(CurrentTypedWord);
+          DisplayText(typeWhat);
+          DisplayText(" ");
+          AutoCompleteOptions = "";
+          CurrentTypedWord = "";
+        }
+      }
+
+    }
+
+    //ParseStringAndPresentOptions(AutoCompleteOptions, '/');
+    //DispalyGridOptionsAndType(autoCompleteOptions, 1, '/', "KeyboardMenu");
+  }
+
+  return "";
 }
 
 // Fill strip pixels one after another with a color. Strip is NOT cleared
