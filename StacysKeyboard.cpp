@@ -1142,7 +1142,8 @@ String PopulateAutoCompleteDicOptions()
         flag = true;
       }
     }
-
+    int MaxAutocompleteLength = 5;
+    int AutoCompleteLength = 0;
     int W = 0;
     String currentWord;
     int currentWordPlace = 0;
@@ -1164,6 +1165,12 @@ String PopulateAutoCompleteDicOptions()
               AutoCompleteOptions += '/';
               currentWord = "";
               currentWordPlace = 0;
+              ++AutoCompleteLength;
+
+              if(AutoCompleteLength >= MaxAutocompleteLength)
+              {
+                i = 105;
+              }
             }
           }
           else if(newLetter == CurrentTypedWord[currentWordPlace] || currentWordPlace >= CurrentTypedWord.length())
