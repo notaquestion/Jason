@@ -89,10 +89,6 @@ String MainMenuContent[] = {
       String SpecialKeyMenu[] = {
         "Enter",
         "Tab",
-        // "LeftArrow",
-        // "RightArrow",
-        // "UpArrow",
-        // "DownArrow",
         // "CapsLock",
         //Home, End, INS, DEL, TAB, ALT (Select Once for Press, 2x for hold)
         "End"
@@ -107,71 +103,34 @@ String MainMenuContent[] = {
     };
 
 // String SymbolMenu[] = {
-//   ".",
-//   ",",
-//   "?",
-//   "!", 
-//   "@",
-//   "#",
-//   "$",
-//   "%",
-//   "^",
-//   "&",
-//   "*",
-//   "(",
-//   ")",
-//   "-",
-//   "_",
-//   "+",
-//   "=",
-//   "/", 
-//   "End"
+//   ".",//   ",",//   "?",//   "!", //   "@",//   "#",//   "$",//   "%",//   "^",//   "&",//   "*",//   "(",//   ")",//   "-",//   "_",//   "+",//   "=",//   "/", //   "End"
 // };
 
 // //Long press to go back should be disabled in mouse menu
-// String MouseMenu[] = {
-//   "Same As Last",
-//   "Back Menu",
-//   "Up",
-//   "Down",
-//   "Left",
-//   "Right",
-//   "L-Click",
-//   "R-Click",
-//   "M-Click",
-//   "Scroll Up",
-//   "Scroll Down",
-//   "Sensitivity Up",
-//   "Sensitivikty Down",
-//   "End"
+// String MouseMenu[] = {//   "Same As Last",//   "Back Menu",//   "Up",//   "Down",//   "Left",//   "Right",//   "L-Click",//   "R-Click",//   "M-Click",//   "Scroll Up",//   "Scroll Down",//   "Sensitivity Up",//   "Sensitivikty Down",//   "End"
 // }; 
-
-
-
-
-
-
 
 //eotha sinrd luymw fgcbp kvjqxz
 
-char LetterClumps[6][6] = {
-{'_', 'E', 'T', 'S', 'D', 'W'},
-{'O', 'H', 'I', 'L', 'F', 'K'},
-{'A', 'N', 'U', 'G', 'V', 'Z'},
-{'R', 'Y', 'C', 'J', '1', '2'},
-{'M', 'B', 'Q', '3', '4', '5'},
-{'P', 'X', '6', '7', '8', '9'}
-};
+// String LetterClumps[7] = {
+//   {"_/E/T/S/D/W"},
+//   {"O/H/I/L/F/K"},
+//   {"A/N/U/G/V/Z"},
+//   {"R/Y/C/J/1/2"},
+//   {"M/B/Q/3/4/5"},
+//   {"P/X/6/7/8/9"},
+//   {"./?/,/+/!"}
+// };
 
-String LetterClumpsS[7] = {
-  {"_/E/T/S/D/W"},
-  {"O/H/I/L/F/K"},
-  {"A/N/U/G/V/Z"},
-  {"R/Y/C/J/1/2"},
-  {"M/B/Q/3/4/5"},
-  {"P/X/6/7/8/9"},
-  {"./?/,/+/!"}
-};
+const char LetterClumps_1[] PROGMEM = "_/E/T/S/D/W";
+const char LetterClumps_2[] PROGMEM = "O/H/I/L/F/K";
+const char LetterClumps_3[] PROGMEM = "A/N/U/G/V/Z";
+const char LetterClumps_4[] PROGMEM = "R/Y/C/J/1/2";
+const char LetterClumps_5[] PROGMEM = "M/B/Q/3/4/5";
+const char LetterClumps_6[] PROGMEM = "P/X/6/7/8/9";
+const char LetterClumps_7[] PROGMEM = "./?/,/+/!";
+const char *const LetterClumps[] PROGMEM = {LetterClumps_1, LetterClumps_2, LetterClumps_3, LetterClumps_4, LetterClumps_5, LetterClumps_6, LetterClumps_7};
+const int LetterClumps_SIZE = 7;
 
 
     String StacyWordsMenu[] = {
@@ -190,45 +149,45 @@ String LetterClumpsS[7] = {
 
 const char Words_Verbs_0[] PROGMEM =  "Want/Went/Saw/Find/Turn/Go";
 const char Words_Verbs_1[] PROGMEM =  "Like/Love/Hurt/Play/Write";
-const char *const Words_Verbs[] PROGMEM = {};
+const char *const Words_Verbs[] PROGMEM = {Words_Verbs_0, Words_Verbs_1};
 const int Words_Verbs_SIZE = 2;
 
 
-const char Words_Things_0[] PROGMEM =  "Wheelchair/Bed/Sheet/Pillow/Van"
-const char *const Words_Things[] PROGMEM = {};
-const int Words_Things_0_SIZE = 1;
+const char Words_Things_0[] PROGMEM =  "Wheelchair/Bed/Sheet/Pillow/Van";
+const char *const Words_Things[] PROGMEM = {Words_Things_0};
+const int Words_Things_SIZE = 1;
 
 
 const char Words_Fun_0[] PROGMEM =  "Games/Tangelo/Steam/Computer/Movie";
 const char Words_Fun_1[] PROGMEM =  "Concert/Drama/Action/Comedy/TV series";
 const char Words_Fun_2[] PROGMEM =  "Tangelo/Letters/Words";
 const char Words_Fun_3[] PROGMEM =  "Adventure Capatalist/Hidden Object/Jigwords";
-const char *const Words_Fun[] PROGMEM = {};
+const char *const Words_Fun[] PROGMEM = {Words_Fun_0, Words_Fun_1, Words_Fun_2, Words_Fun_3};
 const int Words_Fun_SIZE = 4;
 
 
 const char Words_Foods_0[] PROGMEM =  "Macaroni/Lasagna/Cheeseburger/French fries";
 const char Words_Foods_1[] PROGMEM =  "Burrito/Cake/Ice cream sandwich/Cookies";
 const char Words_Foods_2[] PROGMEM =  "Drink straw/Lemonade water/Pineapple water";
-const char *const Words_Foods[] PROGMEM = {};
+const char *const Words_Foods[] PROGMEM = {Words_Foods_0, Words_Foods_1, Words_Foods_2};
 const int Words_Foods_SIZE = 3;
 
 
 const char Words_Body_0[] PROGMEM =  "Arm/Fingers/Hand/Leg/Toes";
 const char Words_Body_1[] PROGMEM =  "Hips/Chest/Head/Neck";
-const char *const Words_Body[] PROGMEM = {};
+const char *const Words_Body[] PROGMEM = {Words_Body_0, Words_Body_1};
 const int Words_Body_SIZE = 2;
 
 
 const char Words_Adjectives_0[] PROGMEM =  "Bad/Painful/Funny/Tired/New";
-const char *const Words_Adjectives[] PROGMEM = {};
+const char *const Words_Adjectives[] PROGMEM = {Words_Adjectives_0};
 const int Words_Adjectives_SIZE = 1;
 
 
 const char Words_People_0[] PROGMEM =  "Mom/Dad/Nick/Gina/Jason/Daniel";
 const char Words_People_1[] PROGMEM =  "Michael/Paul/Deonte/Amanda/Jose";
 const char Words_People_2[] PROGMEM =  "Cherie/Monti/Mike/Marcy/Brandon";
-const char *const Words_People[] PROGMEM = {};
+const char *const Words_People[] PROGMEM = {Words_People_0, Words_People_1, Words_People_2};
 const int Words_People_SIZE = 3;
 
 
@@ -362,7 +321,7 @@ void loop() {
     else if(CurrentMenu == "Type Letter")
     {
       //(String[] options, int size, String seperator, String goBackMenu)
-      String TypeWhat = DispalyGridOptionsAndType(LetterClumpsS, 7, '/', "KeyboardMenu");
+      String TypeWhat = DispalyGridOptionsAndType(LetterClumps, LetterClumps_SIZE, '/', "KeyboardMenu");
 
       if(TypeWhat == "_")
       {
@@ -468,70 +427,75 @@ void loop() {
 
       if(doWhat == Back)
       {
-       CurrentMenu = "MainMenuContent";
+        CurrentMenu = "MainMenuContent";
+      }
+      else if(doWhat == Select1)
+      {
+        CurrentMenu = CurrentSelection;
+        CurrentSelection = "";
       }
     }
       else if(CurrentMenu == "Words_Verbs") {
-        String TypeWhat = DispalyGridOptionsAndType(Words_Verbs, 2, '/', "StacyWordsMenu");
+        String TypeWhat = DispalyGridOptionsAndType(Words_Verbs, Words_Verbs_SIZE, '/', "StacyWordsMenu");
 
         if(TypeWhat != "")
         {
           DisplayText(TypeWhat);
-          CurrentMenu = "KeyboardMenu";
+          CurrentMenu = "MainMenuContent";
         } 
       }
       else if(CurrentMenu == "Words_Things") {
-        String TypeWhat = DispalyGridOptionsAndType(Words_Things, 1, '/', "StacyWordsMenu");
+        String TypeWhat = DispalyGridOptionsAndType(Words_Things, Words_Things_SIZE, '/', "StacyWordsMenu");
 
         if(TypeWhat != "")
         {
           DisplayText(TypeWhat);
-          CurrentMenu = "KeyboardMenu";
+          CurrentMenu = "MainMenuContent";
         }
       }
       else if(CurrentMenu == "Words_Fun") {
-        String TypeWhat = DispalyGridOptionsAndType(Words_Fun, 4, '/', "StacyWordsMenu");
+        String TypeWhat = DispalyGridOptionsAndType(Words_Fun, Words_Fun_SIZE, '/', "StacyWordsMenu");
 
         if(TypeWhat != "")
         {
           DisplayText(TypeWhat);
-          CurrentMenu = "KeyboardMenu";
+          CurrentMenu = "MainMenuContent";
         }
       }
       else if(CurrentMenu == "Words_Foods") {
-        String TypeWhat = DispalyGridOptionsAndType(Words_Foods, 3, '/', "StacyWordsMenu");
+        String TypeWhat = DispalyGridOptionsAndType(Words_Foods, Words_Foods_SIZE, '/', "StacyWordsMenu");
 
         if(TypeWhat != "")
         {
           DisplayText(TypeWhat);
-          CurrentMenu = "KeyboardMenu";
+          CurrentMenu = "MainMenuContent";
         }
       }
       else if(CurrentMenu == "Words_Body") {
-        String TypeWhat = DispalyGridOptionsAndType(Words_Body, 2, '/', "StacyWordsMenu");
+        String TypeWhat = DispalyGridOptionsAndType(Words_Body, Words_Body_SIZE, '/', "StacyWordsMenu");
 
         if(TypeWhat != "")
         {
           DisplayText(TypeWhat);
-          CurrentMenu = "KeyboardMenu";
+          CurrentMenu = "MainMenuContent";
         }
       }
       else if(CurrentMenu == "Words_Adjectives") {
-        String TypeWhat = DispalyGridOptionsAndType(Words_Adjectives, 1, '/', "StacyWordsMenu");
+        String TypeWhat = DispalyGridOptionsAndType(Words_Adjectives, Words_Adjectives_SIZE, '/', "StacyWordsMenu");
 
         if(TypeWhat != "")
         {
           DisplayText(TypeWhat);
-          CurrentMenu = "KeyboardMenu";
+          CurrentMenu = "MainMenuContent";
         }
       }
       else if(CurrentMenu == "Words_People") {
-        String TypeWhat = DispalyGridOptionsAndType(Words_People, 3, '/', "StacyWordsMenu");
+        String TypeWhat = DispalyGridOptionsAndType(Words_People, Words_People_SIZE, '/', "StacyWordsMenu");
 
         if(TypeWhat != "")
         {
           DisplayText(TypeWhat);
-          CurrentMenu = "KeyboardMenu";
+          CurrentMenu = "MainMenuContent";
         }
       }
     else if(CurrentMenu == "MouseMenu"){
@@ -594,26 +558,28 @@ Commands DisplayMenuOptions(String menu_[])
     return doWhat;
 }
 
-String DispalyGridOptionsAndType(String options[], int size, char seperator, String goBackMenu)
+String DispalyGridOptionsAndType(const char* options[], int size, char seperator, String goBackMenu)
 {
   String selection = "";
     AddCurrsor();
 
     for(int g = 0; g < size; ++g)
     {
+
+        String optionsString = RetriveString(&(options[g]));
         DisplayText(" >");
-        DisplayText(options[g]);
+        DisplayText(optionsString);
         DisplayText("<");
 
         Commands doWhatNow = AwaitInput(cycleSpeed);
         
         ClearText(" >");
-        ClearText(options[g]);
+        ClearText(optionsString);
         ClearText("<");
 
         if(doWhatNow == Select1)
         {
-            selection = ParseStringAndPresentOptions(options[g], seperator);
+            selection = ParseStringAndPresentOptions(optionsString, seperator);
            
            if(selection == "")
            {
@@ -636,6 +602,11 @@ String DispalyGridOptionsAndType(String options[], int size, char seperator, Str
         }
     }
     RemoveCursor();
+
+    if(selection.length() > 1)
+    {
+      selection = " " + selection + " ";
+    }
 
     if(selection != "")
     {
@@ -691,12 +662,12 @@ String ParseStringAndPresentOptions(String parseMe, char seperator)
       {
             DisplayText(" |");
             DisplayText(chocies[w]);
-            DisplayText("| ");
+            DisplayText("| /");
       }
       else
       {
         DisplayText(chocies[w]);
-        //DisplayText("/");
+        DisplayText("/");
       }
       // Keyboard.write(options[g][L]);
     }
@@ -724,7 +695,7 @@ String ParseStringAndPresentOptions(String parseMe, char seperator)
       ClearText(chocies[clearWord]);
       // if(clearWord != s)
       // {
-      //   ClearText("/");
+        ClearText("/");
       // }
     }
 
@@ -931,9 +902,8 @@ void MouseFunctions()
 {
   //doWhat = AwaitInput(1);
 
-      float MouseSpeed = 8;
+      float MouseSpeed = 10;
       int MoveDelay = 500;
-      int Moves = 6;
       bool xDirection = false;
 
       float xMax = MouseSpeed * (float)cos(MouseTimer);
@@ -943,7 +913,7 @@ void MouseFunctions()
       int yMove = (round(yMax));
 
       Mouse.move(xMove, yMove);
-      delay(70);
+      delay(300);
 
       int heldTime = 0;
       if(digitalRead(PrimaryInput))
@@ -961,9 +931,9 @@ void MouseFunctions()
           while(digitalRead(PrimaryInput))
           {
             Mouse.move(heldTime * 0.1 * xMove, heldTime * 0.1 * yMove);
-            delay(50);
+            delay(500);
             ++heldTime;
-            fillOverTime(PendingColor, heldTime, 100);
+            fillOverTime(PendingColor, heldTime, 1000);
           }
 
           if(heldTime > 100)
@@ -985,11 +955,9 @@ void MouseFunctions()
 }
 
 char buffer[100];
-String RetriveString(char StoredString[])
+String RetriveString(const char* StoredString[])
 {
-  strcpy_P(buffer, (char *)pgm_read_word(&(StoredString)));  // Necessary casts and dereferencing, just copy.
-  DisplayText("Buffer ");
-  DisplayText(buffer);
+  strcpy_P(buffer, (char *)pgm_read_word(StoredString));  // Necessary casts and dereferencing, just copy.
   return buffer;
 }
 
@@ -1038,7 +1006,4 @@ void fillOverTime(uint32_t color, int currentTime, int maxTime)
   }                   //  Pause for a moment
   
   strip.show();                          //  Update strip to match       
-
-
-
 }
