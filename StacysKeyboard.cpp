@@ -386,11 +386,15 @@ void loop() {
       {
         TypeWhat = " ";
         CurrentTypedWord = "";
+        AutoCompleteOptions = "";
       }
 
       if(TypeWhat != "")
       {
-        CurrentTypedWord += TypeWhat;
+        if(TypeWhat != " ")
+        {
+          CurrentTypedWord += TypeWhat;
+        }
         DisplayText(TypeWhat);
 
         // DisplayText("       CurrentTypedWord:");
@@ -971,6 +975,7 @@ void CycleSpeedOptions()
       cycleSpeed = t;
       String message = String("  --  CycleSpeed: " + String(cycleSpeed));
       DisplayText(message);
+      delay(2000);
       ClearText(message);
 
     }
@@ -1185,7 +1190,6 @@ String PopulateAutoCompleteDicOptions()
       AutoCompleteOptions.remove(AutoCompleteOptions.length() - 1, 1);
       DisplayText(" --- Auto Complete --- ");
       DisplayText(AutoCompleteOptions);
-      delay(cycleSpeed);
       Commands doWhatNow = AwaitInput(cycleSpeed);
       ClearText(AutoCompleteOptions);
       ClearText(" --- Auto Complete --- ");
