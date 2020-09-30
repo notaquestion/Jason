@@ -71,11 +71,11 @@ String MenuDepths[5];
 int CurrentMenuDepth = 0;
 
 String MainMenuContent[] = {
+  "MouseMenu",
   "KeyboardMenu",
   "StacyWordsMenu",
   // "StacyWordMenu",
-  "MouseMenu",
-  "MouseMenuLinear",
+ //"MouseMenuLinear",
   "OptionsMenu",
   "End"
 };
@@ -152,14 +152,14 @@ String CurrentTypedWord = "";
 String AutoCompleteOptions = "";
 
 const char Words_A[] PROGMEM = "ABOUT/ACTION/ADVENTURE CAPATALIST/AFTER/ALSO/AMANDA";
-const char Words_B[] PROGMEM = "BACK/BECAUSE/BRANDON/BURRITO";
+const char Words_B[] PROGMEM = "BACK/BECAUSE/BRANDON/BURRITO/BIG FISH GAMES";
 const char Words_C[] PROGMEM = "CAKE/CHEESEBURGER/CHERIE/CHEST/COME/COMEDY/COMPUTER/CONCERT/COOKIES/COULD";
 const char Words_D[] PROGMEM = "DANIEL/DEONTE/DRAMA/DRINK STRAW";
 const char Words_E[] PROGMEM = "EVEN";
 const char Words_F[] PROGMEM = "FIND/FINGERS/FIRST/FRENCH FRIES/FROM/FUNNY";
 const char Words_G[] PROGMEM = "GAMES/GINA/GIVE/GOOD/GOOD";
 const char Words_H[] PROGMEM = "HAND/HAVE/HEAD/HIDDEN OBJECT/HIPS/HURT";
-const char Words_I[] PROGMEM = "ICE CREAM SANDWICH/INTO";
+const char Words_I[] PROGMEM = "I WANT/I WANT TO/I WANT TO DO/I WANT TO GET/ICE CREAM SANDWICH/INTO";
 const char Words_J[] PROGMEM = "JASON/JIGWORDS/JOSE/JUST";
 const char Words_K[] PROGMEM = "KNOW";
 const char Words_L[] PROGMEM = "LASAGNA/LEMONADE WATER/LETTERS/LIKE/LIKE/LOOK/LOVE";
@@ -284,7 +284,7 @@ void loop() {
 
       if(doWhat == Back)
       {
-        CurrentMenu = "MainMenuContent";
+        CurrentMenu = "MainMenuContent"; 
         delay(500);
         // strip.clear();
         // strip.show();
@@ -576,9 +576,9 @@ void loop() {
     else if(CurrentMenu == "MouseMenu"){
       MouseFunctions();
     }
-    else if(CurrentMenu == "MouseMenuLinear"){
-      MouseFunctionLinear();
-    }
+    // else if(CurrentMenu == "MouseMenuLinear"){
+    //   MouseFunctionLinear();
+    // }
 }
 
 
@@ -986,8 +986,8 @@ void MouseFunctions()
 {
   //doWhat = AwaitInput(1);
 
-      int CircleSpeed = 300;
-      float CircleSize = 10;
+      int CircleSpeed = 200;
+      float CircleSize = 6;
       int MoveDelay = 500;
       bool xDirection = false;
 
@@ -997,7 +997,40 @@ void MouseFunctions()
       int xMove = (round(xMax));
       int yMove = (round(yMax));
 
-      Mouse.move(xMove, yMove);
+
+      //Looks incrimentally cleaner than just moving
+      for(int m = 0; m < 3; ++m)
+      {
+        if(m < 2)
+        {
+          Mouse.move(xMove/3, yMove/3);
+          //Serial.print(xMove/3); Serial.print("\t"); Serial.println(yMove/3);
+        }
+        else
+        {
+          Mouse.move(xMove/3 + xMove % 3, yMove/3 + yMove%3);
+          //Serial.print(xMove/3 + xMove % 3); Serial.print("\t"); Serial.println(yMove/3 + yMOve % 3);
+        }
+
+        //delay(10);
+        int persistanceOfVisionDelay = 50;
+        for(int d = 0; d < persistanceOfVisionDelay; ++d)
+        {
+          if(digitalRead(PrimaryInput) || digitalRead(SeccondInput) || digitalRead(ThirdInput))
+          {
+            d = persistanceOfVisionDelay; 
+            m = 3;
+          }
+          else
+          {
+            delay(1);
+          }
+        }
+      }
+
+      //Mouse.move(xMove, yMove);
+
+      
       delay(CircleSpeed);
 
       int heldTime = 0;
@@ -1018,10 +1051,12 @@ void MouseFunctions()
             Mouse.move(heldTime * 0.1 * xMove, heldTime * 0.1 * yMove);
             delay(100);
             ++heldTime;
-            fillOverTime(PendingColor, heldTime, 1000);
+            fillOverTime(PendingColor, heldTime, 60);
           }
+          strip.clear();
+          strip.show();
 
-          if(heldTime > 100)
+          if(heldTime > 60)
           {
             CurrentMenu = "MainMenuContent";
           }
@@ -1036,86 +1071,88 @@ void MouseFunctions()
       if(!digitalRead(PrimaryInput))
       {
         MouseTimer += 0.1;
+
+
       }
 }
 
 float MouseMoveIteration = 0.0;
-void MouseFunctionLinear()
-{
-    int CrossSpeed = 30;
-    float CrossSize = 70;
-    int MoveDelay = 500;
-    bool xDirection = false;
+// void MouseFunctionLinear()
+// {
+//     int CrossSpeed = 30;
+//     float CrossSize = 70;
+//     int MoveDelay = 500;
+//     bool xDirection = false;
 
-    int xMove = 0;
-    int yMove = 0;
+//     int xMove = 0;
+//     int yMove = 0;
 
-    if(MouseMoveIteration >= 0 && MouseMoveIteration < CrossSize)
-    {
-      xMove = 1; yMove = 0;
-    }
-    else if( MouseMoveIteration > CrossSize && MouseMoveIteration < (2 * CrossSize))
-    {
-      xMove = -1; yMove = 0;
-    }
-    else if( MouseMoveIteration > (2 * CrossSize) && MouseMoveIteration < (3 * CrossSize))
-    {
-      xMove = 0; yMove = 1;
-    }
-    else if( MouseMoveIteration > (3 * CrossSize) && MouseMoveIteration < (4 * CrossSize))
-    {
-      xMove = 0; yMove = -1;
-    }
+//     if(MouseMoveIteration >= 0 && MouseMoveIteration < CrossSize)
+//     {
+//       xMove = 1; yMove = 0;
+//     }
+//     else if( MouseMoveIteration > CrossSize && MouseMoveIteration < (2 * CrossSize))
+//     {
+//       xMove = -1; yMove = 0;
+//     }
+//     else if( MouseMoveIteration > (2 * CrossSize) && MouseMoveIteration < (3 * CrossSize))
+//     {
+//       xMove = 0; yMove = 1;
+//     }
+//     else if( MouseMoveIteration > (3 * CrossSize) && MouseMoveIteration < (4 * CrossSize))
+//     {
+//       xMove = 0; yMove = -1;
+//     }
 
-    MouseMoveIteration += 1.0;
-    if(MouseMoveIteration >= ( 4 * CrossSize))
-    {
-      MouseMoveIteration = 0;
-    }
+//     MouseMoveIteration += 1.0;
+//     if(MouseMoveIteration >= ( 4 * CrossSize))
+//     {
+//       MouseMoveIteration = 0;
+//     }
 
-    Mouse.move(xMove, yMove);
-    delay(CrossSpeed);
+//     Mouse.move(xMove, yMove);
+//     delay(CrossSpeed);
 
-    int heldTime = 0;
-    if(digitalRead(PrimaryInput))
-    {
+//     int heldTime = 0;
+//     if(digitalRead(PrimaryInput))
+//     {
 
-      while(digitalRead(PrimaryInput) && heldTime < MoveDelay)
-      {
-        ++heldTime;
-        delay(1);
-      }
+//       while(digitalRead(PrimaryInput) && heldTime < MoveDelay)
+//       {
+//         ++heldTime;
+//         delay(1);
+//       }
       
-      if(heldTime >= MoveDelay) //Should we start moving or Click?
-      {
-        heldTime = 0;
-        while(digitalRead(PrimaryInput))
-        {
-          Mouse.move(heldTime * 0.3 * xMove, heldTime * 0.3 * yMove);
-          delay(50);
-          ++heldTime;
-          fillOverTime(PendingColor, heldTime, 1000);
-        }
+//       if(heldTime >= MoveDelay) //Should we start moving or Click?
+//       {
+//         heldTime = 0;
+//         while(digitalRead(PrimaryInput))
+//         {
+//           Mouse.move(heldTime * 0.3 * xMove, heldTime * 0.3 * yMove);
+//           delay(50);
+//           ++heldTime;
+//           fillOverTime(PendingColor, heldTime, 1000);
+//         }
 
-        if(heldTime > 1000)
-        {
-          CurrentMenu = "MainMenuContent";
-        }
-        MouseMoveIteration = 0;
-      }
-      else
-      {
-        colorWipe(ConfirmColor, 25);
-        Mouse.click(MOUSE_LEFT);
-        MouseMoveIteration = 0;
-      }
-    }
+//         if(heldTime > 1000)
+//         {
+//           CurrentMenu = "MainMenuContent";
+//         }
+//         MouseMoveIteration = 0;
+//       }
+//       else
+//       {
+//         colorWipe(ConfirmColor, 25);
+//         Mouse.click(MOUSE_LEFT);
+//         MouseMoveIteration = 0;
+//       }
+//     }
 
-    if(!digitalRead(PrimaryInput))
-    {
-      MouseTimer += 0.1;
-    }
-}
+//     if(!digitalRead(PrimaryInput))
+//     {
+//       MouseTimer += 0.1;
+//     }
+// }
 
 char buffer[100];
 String RetriveString(const char* StoredString[])
@@ -1264,11 +1301,11 @@ void theaterChaseRainbow(int wait) {
 
 void fillOverTime(uint32_t color, int currentTime, int maxTime)
 {
-  int numToFill = 1 + ((float)currentTime/(float)maxTime) * ((strip.numPixels() - 2));
-  Serial.println(numToFill);
+  int numToFill = 1 + ((float)currentTime/(float)maxTime) * ((strip.numPixels() - 1));
+  //Serial.println(numToFill);
 
   strip.clear();
-  for(int i=0; i<numToFill; i++) { // For each pixel in strip...
+  for(int i = 0; i < numToFill; i++) { // For each pixel in strip...
     strip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
   }                   //  Pause for a moment
   
