@@ -614,9 +614,20 @@ Commands DisplayMenuOptions(String menu_[])
 
       DisplayText(selectionToDisplay);
 
+      if(M < 6)
+      {
+       strip.clear();
+        
+          strip.setPixelColor(M, PendingColor);         //  Set pixel's color (in RAM)
+                           //  Pause for a moment
+        strip.show(); 
+      }
+
       doWhat = AwaitInput(cycleSpeed); //Will return true when input conditoin true, or false in 1000 frames.
       
       ClearText(selectionToDisplay);
+      strip.clear();
+      strip.show();
       
       if(doWhat == Select1)
       {
