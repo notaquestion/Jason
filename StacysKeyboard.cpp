@@ -54,6 +54,7 @@ uint32_t StartupColor = strip.Color(30, 30, 30);
 uint32_t PendingColor = strip.Color(203, 245, 66);
 uint32_t ConfirmColor = strip.Color(0, 255, 0);
 uint32_t GoBackColor = strip.Color(255, 0, 0);
+uint32_t MouseColor = strip.Color(50, 50, 255);
 
 //INSTRUCTIONS: Hold 1.5s to go back 1 menu. Tap to select.
 
@@ -71,7 +72,7 @@ String MenuDepths[5];
 int CurrentMenuDepth = 0;
 
 String MainMenuContent[] = {
-  "MouseMenu",
+//  "MouseMenu",
   "KeyboardMenu",
   "StacyWordsMenu",
   // "StacyWordMenu",
@@ -284,7 +285,7 @@ void loop() {
 
       if(doWhat == Back)
       {
-        CurrentMenu = "MainMenuContent"; 
+        CurrentMenu = "MouseMenu"; 
         delay(500);
         // strip.clear();
         // strip.show();
@@ -297,7 +298,7 @@ void loop() {
 
       if(doWhat == Back)
       {
-        CurrentMenu = "IdleMenu";
+        CurrentMenu = "MouseMenu";
       }
       else if(doWhat == Select1)
          {
@@ -996,6 +997,11 @@ void CycleSpeedOptions()
 void MouseFunctions()
 {
   //doWhat = AwaitInput(1);
+
+      for(int i=0; i<strip.numPixels(); i++) { // For each pixel in strip...
+        strip.setPixelColor(i, MouseColor);         //  Set pixel's color (in RAM)
+      }
+        strip.show();                          //  Update strip to match
 
       int CircleSpeed = 200;
       float CircleSize = 6;
