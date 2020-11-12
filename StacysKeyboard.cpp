@@ -152,6 +152,8 @@ const int LetterClumps_SIZE = 7;
 String CurrentTypedWord = "";
 String AutoCompleteOptions = "";
 
+
+//WARNING: 300 character limit
 const char Words_A[] PROGMEM = "ABOUT/ACTION/ADVENTURE CAPATALIST/AFTER/ALSO/AMANDA";
 const char Words_B[] PROGMEM = "BACK/BECAUSE/BRANDON/BURRITO/BIG FISH GAMES";
 const char Words_C[] PROGMEM = "CAKE/CHEESEBURGER/CHERIE/CHEST/COME/COMEDY/COMPUTER/CONCERT/COOKIES/COULD";
@@ -169,7 +171,7 @@ const char Words_N[] PROGMEM = "NECK/NICK";
 const char Words_O[] PROGMEM = "ONLY/OTHER/OVER";
 const char Words_P[] PROGMEM = "PAINFUL/PAUL/PEOPLE/PILLOW/PINEAPPLE WATER/PLAY";
 const char Words_S[] PROGMEM = "SHEET/SOME/STEAM";
-const char Words_T[] PROGMEM = "TAKE/TANGELO/TANGELO/THAN/THAT/THEIR/THEM/THEN/THERE/THESE/THEY/THINK/THIS/TIME/TIRED/TOES/TURN/TV SERIES";
+const char Words_T[] PROGMEM = "TAKE/TANGELO/THAN/THANK YOU/THAT/THEIR/THEM/THEN/THERE/THESE/THEY/THINK/THIS/TIME/TIRED/TOES/TURN/TV SERIES";
 const char Words_W[] PROGMEM = "WANT/WANT/WELL/WENT/WHAT/WHEELCHAIR/WHEN/WHICH/WILL/WITH/WORDS/WORK/WOULD/WRITE";
 const char Words_Y[] PROGMEM = "YEAR/YOUR";
 
@@ -1093,83 +1095,7 @@ void MouseFunctions()
       }
 }
 
-float MouseMoveIteration = 0.0;
-// void MouseFunctionLinear()
-// {
-//     int CrossSpeed = 30;
-//     float CrossSize = 70;
-//     int MoveDelay = 500;
-//     bool xDirection = false;
 
-//     int xMove = 0;
-//     int yMove = 0;
-
-//     if(MouseMoveIteration >= 0 && MouseMoveIteration < CrossSize)
-//     {
-//       xMove = 1; yMove = 0;
-//     }
-//     else if( MouseMoveIteration > CrossSize && MouseMoveIteration < (2 * CrossSize))
-//     {
-//       xMove = -1; yMove = 0;
-//     }
-//     else if( MouseMoveIteration > (2 * CrossSize) && MouseMoveIteration < (3 * CrossSize))
-//     {
-//       xMove = 0; yMove = 1;
-//     }
-//     else if( MouseMoveIteration > (3 * CrossSize) && MouseMoveIteration < (4 * CrossSize))
-//     {
-//       xMove = 0; yMove = -1;
-//     }
-
-//     MouseMoveIteration += 1.0;
-//     if(MouseMoveIteration >= ( 4 * CrossSize))
-//     {
-//       MouseMoveIteration = 0;
-//     }
-
-//     Mouse.move(xMove, yMove);
-//     delay(CrossSpeed);
-
-//     int heldTime = 0;
-//     if(digitalRead(PrimaryInput))
-//     {
-
-//       while(digitalRead(PrimaryInput) && heldTime < MoveDelay)
-//       {
-//         ++heldTime;
-//         delay(1);
-//       }
-      
-//       if(heldTime >= MoveDelay) //Should we start moving or Click?
-//       {
-//         heldTime = 0;
-//         while(digitalRead(PrimaryInput))
-//         {
-//           Mouse.move(heldTime * 0.3 * xMove, heldTime * 0.3 * yMove);
-//           delay(50);
-//           ++heldTime;
-//           fillOverTime(PendingColor, heldTime, 1000);
-//         }
-
-//         if(heldTime > 1000)
-//         {
-//           CurrentMenu = "MainMenuContent";
-//         }
-//         MouseMoveIteration = 0;
-//       }
-//       else
-//       {
-//         colorWipe(ConfirmColor, 25);
-//         Mouse.click(MOUSE_LEFT);
-//         MouseMoveIteration = 0;
-//       }
-//     }
-
-//     if(!digitalRead(PrimaryInput))
-//     {
-//       MouseTimer += 0.1;
-//     }
-// }
 
 char buffer[100];
 String RetriveString(const char* StoredString[])
@@ -1185,7 +1111,7 @@ String PopulateAutoCompleteDicOptions()
   if(CurrentTypedWord.length() > 0)
   {
     bool flag = false;
-    char WordsStartingWith[105] = {0};
+    char WordsStartingWith[300] = {0};
     for(int a = 0; a < AutoSuggestDic_SIZE; ++a)
     {
       strcpy_P(WordsStartingWith, (char *)pgm_read_word(&(AutoSuggestDic[a])));
@@ -1199,36 +1125,44 @@ String PopulateAutoCompleteDicOptions()
     int MaxAutocompleteLength = 5;
     int AutoCompleteLength = 0;
     int W = 0;
-    String currentWord;
+    String currentWord = "";
     int currentWordPlace = 0;
-    if(flag = true)
+
+    //Serial.println("--Compiling auto complete--");
+    if(flag == true)
     {
-      for (int i = 0; i < 105; ++i)
+      bool rejected = false;
+      for (int i = 0; i < 300; ++i)
       {
         //delay(100);
-        /* code */
+        
         char newLetter = WordsStartingWith[i];
         if(newLetter != 0)
         {
           if ('/' == newLetter)
           {
-            if(currentWord.length() > 0)
+            //Serial.print("/");
+            if(currentWord.length() > 0 && rejected != true)
             {
               //DisplayText(currentWord);
               AutoCompleteOptions += currentWord;
               AutoCompleteOptions += '/';
-              currentWord = "";
-              currentWordPlace = 0;
               ++AutoCompleteLength;
+
+              //Serial.print("AC_DIC : "); Serial.println(AutoCompleteOptions);
 
               if(AutoCompleteLength >= MaxAutocompleteLength)
               {
-                i = 105;
+                i = 300;
               }
             }
+            rejected = false;
+            currentWord = "";
+            currentWordPlace = 0;
           }
           else if(newLetter == CurrentTypedWord[currentWordPlace] || currentWordPlace >= CurrentTypedWord.length())
           {
+            //Serial.print("["); Serial.print(newLetter); Serial.print("]");
             currentWord += newLetter;
             ++currentWordPlace;
             // DisplayText(currentWord);
@@ -1236,13 +1170,15 @@ String PopulateAutoCompleteDicOptions()
           }
           else
           {
-            currentWord = "";
-            currentWordPlace = 0;
+            //Serial.print("Rejecting: "); Serial.println(currentWord);
+            rejected = true;
+            //Serial.print("X");
+
           }
         }
         else
         {
-          i = 105;
+          i = 300;
         }
       }
     }
