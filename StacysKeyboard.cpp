@@ -333,6 +333,33 @@ void loop() {
               CurrentSelection = "";
 
               CurrentTypedWord.remove(CurrentTypedWord.length() - 1);
+
+              bool again = true;
+              while(again)
+              {
+                DisplayText("<--REPEAT?--");
+                doWhat = AwaitInput(cycleSpeed);
+
+                if(doWhat == None)
+                {
+                  again = false;
+                }
+                else
+                {
+                  ClearText("<--REPEAT?--");
+                  Keyboard.write(KEY_BACKSPACE);
+                  CurrentSelection = "";
+
+                  CurrentTypedWord.remove(CurrentTypedWord.length() - 1);
+                }
+                delay(1);
+
+              }
+              ClearText("<--REPEAT?--");
+
+
+
+
               PopulateAutoCompleteDicOptions();
             }
             else if(CurrentSelection == "AutoComplete")
