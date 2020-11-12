@@ -22,12 +22,8 @@
 */
 
 #include <Adafruit_NeoPixel.h>
-  #ifdef __AVR__
- #include <avr/power.h> // Required for 16 MHz Adafruit Trinket
-#endif
-
-#include "Keyboard.h"
-#include "Mouse.h"
+#include <Adafruit_CircuitPlayground.h>
+#include <BLE52_Mouse_and_Keyboard.h>
 
 #include <avr/pgmspace.h>
 
@@ -39,7 +35,7 @@
 #define LED_COUNT 6
 
   // Declare our NeoPixel strip object:
-Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_CPlay_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 // Argument 1 = Number of pixels in NeoPixel strip
 // Argument 2 = Arduino pin number (most are valid)
 // Argument 3 = Pixel type flags, add together as needed:
@@ -234,33 +230,75 @@ const int ThirdInput = 12;
 
 float MouseTimer = 0.0;
 
-void setup() { // initialize the buttons' inputs:
+void setup() 
+{ // initialize the buttons' inputs:
   
-  pinMode(PrimaryInput, INPUT);
-  pinMode(LED_BUILTIN, OUTPUT);
-  Serial.begin(9600);
+  //  pinMode(PrimaryInput, INPUT);
+  //  pinMode(LED_BUILTIN, OUTPUT);
+  Serial.begin(115200);
+  CircuitPlayground.begin();
   // initialize mouse control:
+
+  // These lines are specifically to support the Adafruit Trinket 5V 16 MHz.
+  // Any other board, you can remove this part (but no harm leaving it):
+  #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
+   clock_prescale_set(clock_div_1);
+  #endif
+
   Mouse.begin();
   Keyboard.begin();
 
-    // These lines are specifically to support the Adafruit Trinket 5V 16 MHz.
-  // Any other board, you can remove this part (but no harm leaving it):
-  #if defined(__AVR_ATtiny85__) && (F_CPU == 16000000)
-    clock_prescale_set(clock_div_1);
-  #endif
-    // END of Trinket-specific code.
+  delay(6000);
+  // colorWipe(CircuitPlayground.strip, PendingColor, 35);
+  // delay(1000);
+  // colorWipe(CircuitPlayground.strip, MouseColor, 35);
+  // delay(1000);
+  CircuitPlayground.clearPixels();
+  delay(1000);
+  int mw = 0;
+  bool red = false;
+  // CircuitPlayground.clearPixels();
+  // colorWipe(CircuitPlayground.strip, MouseColor, 25);
+  // delay(1000);
+  // colorWipe(CircuitPlayground.strip, GoBackColor, 25);
+  // delay(1000);
+  while(!Mouse.isConnected()) 
+  { 
+    Serial.print("."); 
+    delay(100);
+    if(red)
+    {
+      colorWipe(CircuitPlayground.strip, MouseColor, 25);
+    }
+    else
+    {
+      colorWipe(CircuitPlayground.strip, GoBackColor, 25);
+    }
+    red = !red;
 
+    ++mw;
+    if(mw > 50) 
+    {
+      mw = 0; 
+      Serial.println();
+    }
+  }
 
-  strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
-  strip.show();            // Turn OFF all pixels ASAP
-  strip.setBrightness(50); // Set BRIGHTNESS to about 1/5 (max = 255)
+  // Serial.println("\nConnection successful");
 
-  //delay(100);
-  theaterChaseRainbow(50);
-  strip.show();
+  // END of Trinket-specific code.
+  //
+  //
+  //  strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
+  //  strip.show();            // Turn OFF all pixels ASAP
+  //  strip.setBrightness(50); // Set BRIGHTNESS to about 1/5 (max = 255)
+  //
+  delay(3000);
+  theaterChaseRainbow(CircuitPlayground.strip, 50);
   delay(500);
-  strip.clear();
-  strip.show();
+  CircuitPlayground.clearPixels();
+  //  strip.clear();
+  //  strip.show();
 
   // strip.begin();           // INITIALIZE NeoPixel strip object (REQUIRED)
   // strip.show();            // Turn OFF all pixels ASAP
@@ -270,12 +308,16 @@ void setup() { // initialize the buttons' inputs:
 }
 
 void loop() {
-
+ 
     Commands doWhat;
 
     
     
     delay(1);
+    // Serial.println(CurrentMenu);
+    // Serial.print("Looping: ");
+    // Serial.println(CurrentMenu);
+
 
     if(CurrentMenu == "IdleMenu")
     {
@@ -285,7 +327,7 @@ void loop() {
 
       if(doWhat == Back)
       {
-        CurrentMenu = "MouseMenu"; 
+        CurrentMenu = "MainMenuContent"; 
         delay(500);
         // strip.clear();
         // strip.show();
@@ -587,21 +629,28 @@ int CurrentDisplayLength = 0;
 
 void DisplayText (String text_)
 {
+  Serial.print("Going to print: ");
+  Serial.println(text_);
   for(int c = 0; text_[c] != '\0'; ++c)
-      {
-        Keyboard.write(text_[c]);
-        ++CurrentDisplayLength;
-        delay(10);
-      }
+  {
+    Keyboard.write(text_[c]);
+    ++CurrentDisplayLength;
+    delay(10);
+  }
+  Serial.println("Finsihed Print");
 }
 
 void ClearText (String text_)
 {
-    for(int c = 0; text_[c] != '\0'; ++c)
-    {
-      Keyboard.write(KEY_BACKSPACE);
-      delay(10);
-    }
+  Serial.print("Clear Text: ");
+  Serial.println(text_);
+  for(int c = 0; text_[c] != '\0'; ++c)
+  {
+    Keyboard.write(KEY_BACKSPACE);
+    delay(10);
+  }
+  Serial.print("Clear Text2 ");
+  Serial.println(text_);
 }
 
 Commands DisplayMenuOptions(String menu_[])
@@ -611,28 +660,42 @@ Commands DisplayMenuOptions(String menu_[])
   Commands doWhat;
   for(int M = 0; menu_[M] != "End"; ++M)
     {
-      String selectionToDisplay = menu_[M];
+      String selectionToDisplay = String(menu_[M]);
+      
+      Serial.print("Selection To Display1: ");
+      Serial.println(selectionToDisplay);
+      delay(100);
 
       DisplayText(selectionToDisplay);
 
-      if(M < 6)
-      {
-       strip.clear();
-        
-          strip.setPixelColor(M, PendingColor);         //  Set pixel's color (in RAM)
-                           //  Pause for a moment
-        strip.show(); 
-      }
+      Serial.print("Selection To Display2: ");
+      Serial.println(selectionToDisplay);
+
+      // if(M < 6)
+      // {
+      //     strip.setPixelColor(M, PendingColor);         //  Set pixel's color (in RAM)
+      //                      //  Pause for a moment
+      // }
 
       doWhat = AwaitInput(cycleSpeed); //Will return true when input conditoin true, or false in 1000 frames.
       
+      delay(100);
+      Serial.print("Selection To Display3: ");
+      Serial.println(selectionToDisplay);
+      delay(100);
+
       ClearText(selectionToDisplay);
-      strip.clear();
-      strip.show();
+
+      Serial.print("Selection To Display4: ");
+      Serial.println(selectionToDisplay);
       
       if(doWhat == Select1)
       {
         CurrentSelection = selectionToDisplay;
+
+        Serial.print("Selection To Display5: ");
+        Serial.println(selectionToDisplay);
+
         RemoveCursor();
         return doWhat;
       }
@@ -648,7 +711,7 @@ Commands DisplayMenuOptions(String menu_[])
     return doWhat;
 }
 
-String DispalyGridOptionsAndType(const char* options[], int size, char seperator, String goBackMenu)
+String DispalyGridOptionsAndType(const char *options[], int size, char seperator, String goBackMenu)
 {
   String selection = "";
     AddCurrsor();
@@ -656,7 +719,7 @@ String DispalyGridOptionsAndType(const char* options[], int size, char seperator
     for(int g = 0; g < size; ++g)
     {
 
-        String optionsString = RetriveString(&(options[g]));
+        String optionsString = RetriveString(*(options[g]));
         DisplayText(" >");
         DisplayText(optionsString);
         DisplayText("<");
@@ -812,67 +875,78 @@ String ParseStringAndPresentOptions(String parseMe, char seperator)
   }
 }
 
+bool TouchCondition()
+{
+  //Serial.println(CircuitPlayground.readCap(0));
+  return CircuitPlayground.readCap(0) > 1000;
+}
+
 Commands AwaitInput(int FramesToWait)
 {
+  Serial.println("AwaitingInput");
   delay(50);
   bool hasBeenFalse = false; //Has this ever been false? TO prevent button from being held accidentily as part of last press.
 
   int i = 0;
   while (i < FramesToWait)
   {
-    if(digitalRead(PrimaryInput) == LOW) //No Input
+    if(!TouchCondition()) //No Input
     {
+      //Serial.println("NotTouching");
+
       ++i;
       delay(1);
-      digitalWrite(LED_BUILTIN, LOW);
-
+      //digitalWrite(LED_BUILTIN, LOW);
       hasBeenFalse = true;
-
       CycleSpeedOptions();
+      
     }
-    else if(digitalRead(PrimaryInput) == HIGH && hasBeenFalse) 
+    else if(TouchCondition() && hasBeenFalse) 
     {
+      //CircuitPlayground.playTone(50, 100, false);
       Serial.print("TouchStarted:"); Serial.println(FramesToWait);
+      delay(100);
       int t = 0;
 
-      digitalWrite(LED_BUILTIN, HIGH);
-      while(t <= GoBackHoldTime && digitalRead(PrimaryInput) == HIGH)
+      //digitalWrite(LED_BUILTIN, HIGH);
+      while(t <= GoBackHoldTime && TouchCondition())
       {
-        fillOverTime(PendingColor, t, GoBackHoldTime);
+        fillOverTime(CircuitPlayground.strip, PendingColor, t, GoBackHoldTime);
         t += 1;
         delay(1);
       }
-      digitalWrite(LED_BUILTIN, LOW);
+      Serial.println("Finished Touch");
+      //digitalWrite(LED_BUILTIN, LOW);
 
-      strip.clear();
-      strip.show();
+      //CircuitPlayground.clearPixels();
 
       if(t >= GoBackHoldTime)
       {
-        DisplayText(" --Back-- ");
-        colorWipe(GoBackColor, 25); 
-        strip.show();
-        Serial.print("Back:"); Serial.println(t);
-        delay(500);
-        ClearText(" --Back-- ");
+        // //CircuitPlayground.playTone(50, 100, false);
+        // Serial.println("Go Back");
+        // DisplayText(" --Back-- ");
+        // colorWipe(CircuitPlayground.strip, GoBackColor, 25); 
+        // Serial.print("Back:"); Serial.println(t);
+        // delay(500);
+        // ClearText(" --Back-- ");
         
-        strip.clear();
-        strip.show();
+        // CircuitPlayground.clearPixels();
         return Back;
       }
       else if (t >= inputDelay)
       {
-        DisplayText(" --Selected-- ");
-        DisplayText(String(t));
-        colorWipe(ConfirmColor, 25); 
-        strip.show();
-        Serial.print("Select:"); Serial.println(t);
-        delay(500);
-        ClearText(String(t));
-        ClearText(" --Selected-- ");
+        // //CircuitPlayground.playTone(100, 100, false);
+        // Serial.println("Select");
 
-        strip.clear();
-        strip.show();
+        // DisplayText(" --Selected-- ");
+        // DisplayText(String(t));
+        // colorWipe(CircuitPlayground.strip, ConfirmColor, 25); 
+        // Serial.print("Select:"); Serial.println(t);
+        // delay(500);
+        // ClearText(String(t));
+        // ClearText(" --Selected-- ");
+
+        // CircuitPlayground.clearPixels();
         return Select1;
       }
       
@@ -880,8 +954,7 @@ Commands AwaitInput(int FramesToWait)
 
   }
 
-  strip.clear();
-  strip.show();
+  CircuitPlayground.clearPixels();
   return None;
 }
 
@@ -947,19 +1020,22 @@ void SlowerCycleSpeed()
 
 void CycleSpeedOptions()
 {
-  if(digitalRead(SeccondInput))
+  //Serial.println("CyclingSpeedOptions");
+  if(CircuitPlayground.leftButton())
   {
     int t = 0;
 
     digitalWrite(LED_BUILTIN, HIGH);
-    while(digitalRead(SeccondInput) == HIGH)
+    Serial.println("CyclingSpeedOptions2");
+    while(CircuitPlayground.leftButton())
     {
       t += 1;
       delay(1);
+      Serial.println("CyclingSpeedOptions3");
     }
     digitalWrite(LED_BUILTIN, LOW);
 
-
+  Serial.println("CyclingSpeedOptions4");
     if(t >= 200)
     {
       GoBackHoldTime = t;
@@ -969,12 +1045,12 @@ void CycleSpeedOptions()
       ClearText(message);
     }
   }
-  else if(digitalRead(ThirdInput))
+  else if(CircuitPlayground.rightButton())
   {
     int t = 0;
 
     digitalWrite(LED_BUILTIN, HIGH);
-    while(digitalRead(ThirdInput) == HIGH)
+    while(CircuitPlayground.rightButton())
     {
       t += 1;
       delay(1);
@@ -1033,7 +1109,7 @@ void MouseFunctions()
         int persistanceOfVisionDelay = 50;
         for(int d = 0; d < persistanceOfVisionDelay; ++d)
         {
-          if(digitalRead(PrimaryInput) || digitalRead(SeccondInput) || digitalRead(ThirdInput))
+          if(TouchCondition() || CircuitPlayground.leftButton() || CircuitPlayground.rightButton())
           {
             d = persistanceOfVisionDelay; 
             m = 3;
@@ -1051,10 +1127,10 @@ void MouseFunctions()
       delay(CircleSpeed);
 
       int heldTime = 0;
-      if(digitalRead(PrimaryInput))
+      if(TouchCondition())
       {
 
-        while(digitalRead(PrimaryInput) && heldTime < MoveDelay)
+        while(TouchCondition() && heldTime < MoveDelay)
         {
           ++heldTime;
           delay(1);
@@ -1063,12 +1139,12 @@ void MouseFunctions()
         if(heldTime >= MoveDelay) //Should we start moving or Click?
         {
           heldTime = 0;
-          while(digitalRead(PrimaryInput))
+          while(TouchCondition())
           {
             Mouse.move(heldTime * 0.1 * xMove, heldTime * 0.1 * yMove);
             delay(100);
             ++heldTime;
-            fillOverTime(PendingColor, heldTime, 60);
+            fillOverTime(CircuitPlayground.strip, PendingColor, heldTime, 60);
           }
           strip.clear();
           strip.show();
@@ -1080,12 +1156,12 @@ void MouseFunctions()
         }
         else
         {
-          colorWipe(ConfirmColor, 25);
+          colorWipe(CircuitPlayground.strip, ConfirmColor, 25);
           Mouse.click(MOUSE_LEFT);
         }
       }
 
-      if(!digitalRead(PrimaryInput))
+      if(!TouchCondition())
       {
         MouseTimer += 0.1;
 
@@ -1093,88 +1169,14 @@ void MouseFunctions()
       }
 }
 
-float MouseMoveIteration = 0.0;
-// void MouseFunctionLinear()
-// {
-//     int CrossSpeed = 30;
-//     float CrossSize = 70;
-//     int MoveDelay = 500;
-//     bool xDirection = false;
 
-//     int xMove = 0;
-//     int yMove = 0;
-
-//     if(MouseMoveIteration >= 0 && MouseMoveIteration < CrossSize)
-//     {
-//       xMove = 1; yMove = 0;
-//     }
-//     else if( MouseMoveIteration > CrossSize && MouseMoveIteration < (2 * CrossSize))
-//     {
-//       xMove = -1; yMove = 0;
-//     }
-//     else if( MouseMoveIteration > (2 * CrossSize) && MouseMoveIteration < (3 * CrossSize))
-//     {
-//       xMove = 0; yMove = 1;
-//     }
-//     else if( MouseMoveIteration > (3 * CrossSize) && MouseMoveIteration < (4 * CrossSize))
-//     {
-//       xMove = 0; yMove = -1;
-//     }
-
-//     MouseMoveIteration += 1.0;
-//     if(MouseMoveIteration >= ( 4 * CrossSize))
-//     {
-//       MouseMoveIteration = 0;
-//     }
-
-//     Mouse.move(xMove, yMove);
-//     delay(CrossSpeed);
-
-//     int heldTime = 0;
-//     if(digitalRead(PrimaryInput))
-//     {
-
-//       while(digitalRead(PrimaryInput) && heldTime < MoveDelay)
-//       {
-//         ++heldTime;
-//         delay(1);
-//       }
-      
-//       if(heldTime >= MoveDelay) //Should we start moving or Click?
-//       {
-//         heldTime = 0;
-//         while(digitalRead(PrimaryInput))
-//         {
-//           Mouse.move(heldTime * 0.3 * xMove, heldTime * 0.3 * yMove);
-//           delay(50);
-//           ++heldTime;
-//           fillOverTime(PendingColor, heldTime, 1000);
-//         }
-
-//         if(heldTime > 1000)
-//         {
-//           CurrentMenu = "MainMenuContent";
-//         }
-//         MouseMoveIteration = 0;
-//       }
-//       else
-//       {
-//         colorWipe(ConfirmColor, 25);
-//         Mouse.click(MOUSE_LEFT);
-//         MouseMoveIteration = 0;
-//       }
-//     }
-
-//     if(!digitalRead(PrimaryInput))
-//     {
-//       MouseTimer += 0.1;
-//     }
-// }
 
 char buffer[100];
-String RetriveString(const char* StoredString[])
+String RetriveString(const char *StoredString[])
 {
   strcpy_P(buffer, (char *)pgm_read_word(StoredString));  // Necessary casts and dereferencing, just copy.
+  Serial.print("Retreived string");
+  Serial.println(buffer);
   return buffer;
 }
 
@@ -1276,7 +1278,7 @@ String PopulateAutoCompleteDicOptions()
     }
 
     //ParseStringAndPresentOptions(AutoCompleteOptions, '/');
-    //DispalyGridOptionsAndType(autoCompleteOptions, 1, '/', "KeyboardMenu");
+    // DispalyGridOptionsAndType(autoCompleteOptions, 1, '/', "KeyboardMenu");
   }
 
   return "";
@@ -1287,44 +1289,67 @@ String PopulateAutoCompleteDicOptions()
 // (as a single 'packed' 32-bit value, which you can get by calling
 // strip.Color(red, green, blue) as shown in the loop() function above),
 // and a delay time (in milliseconds) between pixels.
-void colorWipe(uint32_t color, int wait) {
-  for(int i=0; i<strip.numPixels(); i++) { // For each pixel in strip...
-    strip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
-    strip.show();                          //  Update strip to match
-    delay(wait);                           //  Pause for a moment
-  }
+void colorWipe(Adafruit_CPlay_NeoPixel strip_, uint32_t color, int wait) {
+  // delay(100);
+  // Serial.println("Going to color wipe");
+  // delay(100);
+  // strip_.clear();
+
+  // strip_.setPixelColor(9, PendingColor);
+  // strip_.show();
+  // delay(1000);
+  // strip_.clear();
+  // strip_.setPixelColor(9, GoBackColor);
+  // strip_.show();
+  // delay(1000);
+  // strip_.clear();
+
+  // for(int j = 0; j < strip_.numPixels(); j++) { // For each pixel in strip...
+  //   if(j != 0 && j != 1)
+  //   {
+  //     Serial.println(strip_.numPixels());
+  //     //Doing these two to the CP strip causes arduino to hang and hang serial monitor for some reason?
+  //     strip_.setPixelColor(strip_.numPixels(), color);         //  Set pixel's color (in RAM)
+  //     //CircuitPlayground.setPixelColor(i, color);
+  //     delay(wait);                           //  Pause for a moment
+  //     strip_.show();                          //  Update strip to match
+  //   }
+
+
+  // }
+  // //CircuitPlayground.clearPixels();
 }
 
-void theaterChaseRainbow(int wait) {
-  int firstPixelHue = 0;     // First pixel starts at red (hue 0)
-  for(int a=0; a<30; a++) {  // Repeat 30 times...
-    for(int b=0; b<3; b++) { //  'b' counts from 0 to 2...
-      strip.clear();         //   Set all pixels in RAM to 0 (off)
-      // 'c' counts up from 'b' to end of strip in increments of 3...
-      for(int c=b; c<strip.numPixels(); c += 3) {
-        // hue of pixel 'c' is offset by an amount to make one full
-        // revolution of the color wheel (range 65536) along the length
-        // of the strip (strip.numPixels() steps):
-        int      hue   = firstPixelHue + c * 65536L / strip.numPixels();
-        uint32_t color = strip.gamma32(strip.ColorHSV(hue)); // hue -> RGB
-        strip.setPixelColor(c, color); // Set pixel 'c' to value 'color'
-      }
-      strip.show();                // Update strip with new contents
-      delay(wait);                 // Pause for a moment
-      firstPixelHue += 65536 / 90; // One cycle of color wheel over 90 frames
-    }
-  }
+void theaterChaseRainbow(Adafruit_CPlay_NeoPixel strip_, int wait) {
+  // int firstPixelHue = 0;     // First pixel starts at red (hue 0)
+  // for(int a=0; a<30; a++) {  // Repeat 30 times...
+  //   for(int b=0; b<3; b++) { //  'b' counts from 0 to 2...
+  //     strip_.clear();         //   Set all pixels in RAM to 0 (off)
+  //     // 'c' counts up from 'b' to end of strip_ in increments of 3...
+  //     for(int c=b; c<strip_.numPixels(); c += 3) {
+  //       // hue of pixel 'c' is offset by an amount to make one full
+  //       // revolution of the color wheel (range 65536) along the length
+  //       // of the strip_ (strip_.numPixels() steps):
+  //       int      hue   = firstPixelHue + c * 65536L / strip_.numPixels();
+  //       uint32_t color = strip_.gamma32(strip_.ColorHSV(hue)); // hue -> RGB
+  //       strip_.setPixelColor(c, color); // Set pixel 'c' to value 'color'
+  //     }
+  //     strip_.show();                // Update strip_ with new contents
+  //     delay(wait);                 // Pause for a moment
+  //     firstPixelHue += 65536 / 90; // One cycle of color wheel over 90 frames
+  //   }
+  // }
 }
 
-void fillOverTime(uint32_t color, int currentTime, int maxTime)
+void fillOverTime(Adafruit_CPlay_NeoPixel strip, uint32_t color, int currentTime, int maxTime)
 {
-  int numToFill = 1 + ((float)currentTime/(float)maxTime) * ((strip.numPixels() - 1));
-  //Serial.println(numToFill);
+  // int numToFill = 1 + ((float)currentTime/(float)maxTime) * ((strip.numPixels() - 1));
+  // //Serial.println(numToFill);
 
-  strip.clear();
-  for(int i = 0; i < numToFill; i++) { // For each pixel in strip...
-    strip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
-  }                   //  Pause for a moment
+  // strip.clear();
+  // for(int i = 0; i < numToFill; i++) { // For each pixel in strip...
+  //   strip.setPixelColor(i, color);         //  Set pixel's color (in RAM)
+  // }                   //  Pause for a moment
   
-  strip.show();                          //  Update strip to match       
+  // strip.show();                          //  Update strip to match       
 }
