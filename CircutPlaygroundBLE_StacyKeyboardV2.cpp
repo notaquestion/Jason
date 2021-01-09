@@ -61,6 +61,11 @@ static const char * MenuTreeAsStrings[] = {
   "MouseMenu"
 };
 
+String MenuTreeToString(MenuTree menu)
+{
+  return MenuTreeAsStrings[menu];
+}
+
 //What Menus have sub menus? What MenuTree entries are subsidiary to each?
 MenuTree M_MainMenu[] = { //Can't just be called MainMenu w/o compiler thinking I meant the enum element.
   KeyboardMenu,
@@ -175,17 +180,242 @@ void setup()
   // }
   // CircuitPlayground.clearPixels();
 
+  Serial.println(MenuTreeToString(MainMenu));
+
+
+
 }
 
 char buffer[200];  // make sure this is large enough for the largest string it must hold
 int bufferSize = 200;
 
 void loop() {
-  delay(100);
-  NextCommand = AwaitInput(CycleSpeed);
+
+  //NextCommand = AwaitInput(CycleSpeed);
+
+  if(NextMenu != NoMenu)
+  {
+    CurrentMenu = NextMenu;
+    NextMenu = NoMenu;
+  }
+
+  //Big state machine based off MenuTree enum. 
+  switch(CurrentMenu) {
+    
+    case NoMenu:
+        while(true)
+        {
+          Serial.println("Error: NO MENU?");
+          delay(1);
+        }
+        break;
+
+    case IdleMenu: 
+        NextCommand = AwaitInput(CycleSpeed);
+
+        if(NextCommand == Select1)
+        {
+            DisplayText("Select Pressed, Hold to Use Mouse");
+            delay(1000);
+            ClearText("Select Pressed, Hold to Use Mouse");
+        }
+        else if(NextCommand == Back)
+        {
+            DisplayText("Going to Mouse Menu");
+            delay(1000);
+            ClearText("Going to Mouse Menu");
+
+            CurrentMenu = MouseMenu;
+        }
+
+        break;
+
+    case MainMenu: 
+    
+        break;
+
+      case KeyboardMenu:
+      
+          break;
+
+        case TypeLetter:
+        
+            break;
+
+        case Backspace: 
+        
+            break;
+
+        case SpecialKeyMenu:
+        
+            break;
+
+          case Enter: 
+          
+              break;
+
+          case Tab:
+      
+              break;
+
+      case OptionsMenu:
+      
+          break;
+
+        case FasterCycleSpeed:
+        
+            break;
+
+        case LongerCycleSpeed:
+        
+            break;
+
+        case ShorterGoBackInput:
+        
+            break;
+
+        case LongerGoBackInput:
+    
+            break;
+
+    case MouseMenu:
+        MouseFunctions();
+        break;
+
+    default:
+
+        break;
+  }
 
 }
 
+
+//
+//This Function gets evaluated every frame. 
+//When the input is not held, MouseTimer is incrimented.
+//  //New Sin/Cos movment values are compute from MouseTimer such that the mouse moves in a circle.
+//When the input starts, we determine if a hold or a press is occuring.
+//  //If a press is occuring, click.
+//  //If a hold is occuring, continue moving at your current vector, i.e. a tangent to the circle. (Gotta see it in action)
+//
+void MouseFunctions()
+{
+  //doWhat = AwaitInput(1);
+
+      //Base Color
+      for(int i=0; i < 10; i++) { // For each pixel in strip...
+        CircuitPlayground.setPixelColor(i, MouseColor);         //  Set pixel's color (in RAM)
+      }                        
+
+      //MOUSE SETTINGS
+      //int CircleSpeed = 200; // Delay between each frame of the rotating circle, lower value, faster movement.
+      int CircleSpeed = 10; 
+      float CircleSize = 6; // Circle Radius
+      
+      int MoveDelay = 500; // Hold time/delay before mouse starts moving instead of clicking.
+      
+      int MouseLinearSpeed = 100; //The Delay between each frame of the mouse moving in a line. Longer is slower.
+      int HoldToGoBackLength = 60; //How many MouseLinearSpeed delays we should wait before going back to the MainMenu from this Mouse Menu
+      
+      //INTERNAL
+      bool xDirection = false;
+      float xMax = CircleSize * (float)cos(MouseTimer);
+      float yMax = CircleSize * (float)sin(MouseTimer);
+
+      int xMove = (round(xMax));
+      int yMove = (round(yMax));
+
+
+      //MOVE THE MOUSE
+      //Uses a special 3rds technique to make the circle look a little more circular and less like discrete chunks. 
+      for(int m = 0; m < 3; ++m)
+      {
+        if(m < 2)
+        {
+          Mouse.move(xMove/3, yMove/3);
+          //Serial.print(xMove/3); Serial.print("\t"); Serial.println(yMove/3);
+        }
+        else
+        {
+          Mouse.move(xMove/3 + xMove % 3, yMove/3 + yMove%3);
+          //Serial.print(xMove/3 + xMove % 3); Serial.print("\t"); Serial.println(yMove/3 + yMOve % 3);
+        }
+
+        int persistanceOfVisionDelay = 50; //Delay stuff just a little to make it look like a continuous motion.
+        for(int d = 0; d < persistanceOfVisionDelay; ++d)
+        {
+          if(TouchCondition())
+          {
+            d = persistanceOfVisionDelay; //Break out
+            m = 3;
+          }
+          else
+          {
+            delay(1);
+          }
+        }
+      }
+
+      delay(CircleSpeed); //Here we have the real option to slow down/spead up the circle. 
+
+      //Clicking and moving the mouse in a straight line.
+      int heldTime = 0;
+      if(TouchCondition())
+      {
+        CircuitPlayground.playTone(50, 100, false);
+
+        //While the user TouchCondition(), everything stops, at least for MoveDelay amount of time. Longer than move dealy would be a HOLD action.
+        while(TouchCondition() && heldTime < MoveDelay)
+        {
+          ++heldTime;
+          delay(1);
+        }
+        
+        //Are we holding the TouchCondition for greater than MoveDelay? If so, we're holding and we should move the mouse!
+        if(heldTime >= MoveDelay) 
+        {
+          CircuitPlayground.playTone(50, 100, false);
+          
+          heldTime = 0; //Lets use this again.
+
+          //As long as we're still holding this. Move, and accelerate our speed, and fill our HeldTime/fill over time meter.
+          //If heldTime Goes over HoldToGoBackLength, we go back to typing Menu.
+          while(TouchCondition()) 
+          {
+            Mouse.move(heldTime * 0.1 * xMove, heldTime *  0.1 * yMove); //Using heldTime as a scaler results in a linear acceleration.
+            delay(MouseLinearSpeed);
+            ++heldTime;
+            fillOverTime(PendingColor, heldTime, HoldToGoBackLength); //Let us know how long until we trigger a go back to main menu.
+          }
+
+          if(heldTime > HoldToGoBackLength)
+          {
+            CurrentMenu = MainMenu;
+            CircuitPlayground.playTone(50, 300, false);
+            colorWipe(GoBackColor, 50);
+          }
+          else
+          {
+            CircuitPlayground.playTone(150, 100, false);
+          }
+        }
+        else
+        {
+          CircuitPlayground.playTone(100, 100, false);
+          colorWipe(ConfirmColor, 25);
+          Mouse.click(MOUSE_LEFT);
+        }
+      }
+      //The other case, just incriment the timer so our rotation continues. 
+      else if(!TouchCondition())
+      {
+        MouseTimer += 0.1;
+      }
+}
+
+
+
+//////////////////////////////INPUT FUNCTIONS/////////////////////////////////
 bool TouchCondition()
 {
   Serial.print(" CT0("); Serial.print(CircuitPlayground.readCap(0));Serial.print(')');
@@ -276,7 +506,35 @@ Commands AwaitInput(int FramesToWait)
 }
 
 
+////////////////////////////TEXT DISPLAY//////////////////////////////////////
+void DisplayText (String text_)
+{
+  // Serial.print("Going to print: ");
+  // Serial.println(text_);
+  for(int c = 0; text_[c] != '\0'; ++c)
+  {
+    Keyboard.write(text_[c]);
+    //delay(10);
+  }
+  // Serial.println("Finished Print");
+}
 
+void ClearText (String text_)
+{
+  // Serial.print("Clear Text: ");
+  // Serial.println(text_);
+  for(int c = 0; text_[c] != '\0'; ++c)
+  {
+    Keyboard.write(KEY_BACKSPACE);
+    //delay(10);
+  }
+  // Serial.print("Clear Text2 ");
+  // Serial.println(text_);
+}
+
+
+
+/////////////////////////////LED FUNCTIONS//////////////////////////////////////
 
 void colorWipe(uint32_t color, int wait) {
    for(int i=0; i< 10; i++) { // For each pixel in strip...
