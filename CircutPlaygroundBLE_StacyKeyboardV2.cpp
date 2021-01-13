@@ -3,6 +3,7 @@
 #include <TinyUSB_Mouse_and_Keyboard.h>
 
 #include <avr/pgmspace.h>
+#include <math.h>    // (no semicolon)
 
 
 ///////////////////////GLOBAL VARIABLES///////////////////////
@@ -385,7 +386,7 @@ void MouseFunctions()
 
       //Base Color
       for(int i=0; i < 10; i++) { // For each pixel in strip...
-        CircuitPlayground.setPixelColor(i, MouseColor);         //  Set pixel's color (in RAM)
+        CircuitPlayground.setPixelColor(i, 0x110000);         //  Set pixel's color (in RAM)
       }                        
 
       //MOUSE SETTINGS
@@ -409,6 +410,29 @@ void MouseFunctions()
 
       int xMove = (round(xMax));
       int yMove = (round(yMax));
+
+      Serial.println("");
+
+
+      //Light up coresponding pixel on circut playgrond. (We have 10 pixels, but we'll treat it like a clock with 12 positions because of how pixels are offset)
+      double deg = ((atan2(yMax, xMax) / ( 2* 3.14159)) + 0.5); // 0.0 - 1.0 range based on vector of the mouse;
+      int pixelAsDirection = (12 - ceil(deg * 12.0)); //Switch the direction and scale to 12.
+      pixelAsDirection = (pixelAsDirection + 8) % 12; //If you mount the Circut playground with the USB at the 5'clock position, then when the top pixel is lit, the mouse will go up. No light on 5 o'clock and 11 o'clock
+      if(pixelAsDirection <= 4)
+      {
+        CircuitPlayground.setPixelColor(pixelAsDirection, 0x0000FF);
+      }
+      //else if(pixelAsDirection == 5)
+      //{} //NO Light on 5
+      else if(pixelAsDirection > 5 && pixelAsDirection < 11)
+      {
+        pixelAsDirection -= 1;
+        CircuitPlayground.setPixelColor(pixelAsDirection, 0x0000FF);
+      }
+      //else if(pixelAsDirection == 11)
+      //{} //NO Light on 11
+
+      //Serial.print("Arctan: "); Serial.print(deg); Serial.print(" pixelAsDirection: "); Serial.println(pixelAsDirection);
 
 
       //MOVE THE MOUSE
@@ -440,6 +464,7 @@ void MouseFunctions()
           }
         }
       }
+
 
       delay(CircleSpeed); //Here we have the real option to slow down/spead up the circle. 
 
@@ -865,6 +890,9 @@ String ParseStringAndPresentOptions(String parseMe, char seperator)
   }
 }
 
+//Create a list (5 long) of possible words from Autocomplete arrays, present them and await input.
+//If user confirms they see the word they're trying to type, cycle those (up to) 5 options, if the user confirms the current word, type it.
+//Otherwise, go back to previous behavior.
 String PopulateAutoCompleteDicOptions()
 {
   Serial.print("Current Typed Word: "); Serial.println(CurrentTypedWord);
