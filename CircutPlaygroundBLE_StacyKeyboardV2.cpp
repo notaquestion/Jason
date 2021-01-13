@@ -6,8 +6,8 @@
 
 
 ///////////////////////GLOBAL VARIABLES///////////////////////
-int CycleSpeed = 1000; //Delay befor showing a new clickable option.
-int GoBackHoldTime = 1500; //Amount of time user must hold input to peform Back Command in AwaitInput.
+int CycleSpeed = 1500; //Delay befor showing a new clickable option.
+int GoBackHoldTime = 2000; //Amount of time user must hold input to peform Back Command in AwaitInput.
 int InputDelay = 5; //Delay before a new Input can be started after showing a new option.
 
 float MouseTimer = 0.0;  //Timer used to determine mouse roation and angle in MouseFunctions();
@@ -872,8 +872,8 @@ String PopulateAutoCompleteDicOptions()
   AutoCompleteOptions = "";
   if(CurrentTypedWord.length() > 0)
   {
-    bool flag = false;
-    String WordsStartingWith = "";
+    bool thisAutoSuggestDicExists = false; // Does an array starting with this letter exist?
+    String WordsStartingWith = ""; // The current AutoSuggestDic of words starting with the same letter as our Current typed word.
     for(int a = 0; a < AutoSuggestDic_SIZE; ++a)
     {
       WordsStartingWith = AutoSuggestDic[a];
@@ -881,7 +881,7 @@ String PopulateAutoCompleteDicOptions()
       if(WordsStartingWith[0] == CurrentTypedWord[0])
       {
         a = AutoSuggestDic_SIZE;
-        flag = true;
+        thisAutoSuggestDicExists = true;
       }
     }
     int MaxAutocompleteLength = 5;
@@ -891,7 +891,7 @@ String PopulateAutoCompleteDicOptions()
     int currentWordPlace = 0;
 
     //Serial.println("--Compiling auto complete--");
-    if(flag == true)
+    if(thisAutoSuggestDicExists == true)
     {
       bool rejected = false;
       for (int i = 0; i < 300; ++i)
@@ -899,48 +899,41 @@ String PopulateAutoCompleteDicOptions()
         //delay(100);
         
         char newLetter = WordsStartingWith[i];
-        if(newLetter != 0)
+        if ('/' == newLetter || newLetter == 0) //End of array or any /
         {
-          if ('/' == newLetter)
+          //Serial.print("/");
+          if(currentWord.length() > 0 && rejected != true)
           {
-            //Serial.print("/");
-            if(currentWord.length() > 0 && rejected != true)
+            //DisplayText(currentWord);
+            AutoCompleteOptions += currentWord;
+            AutoCompleteOptions += '/';
+            ++AutoCompleteLength;
+
+            //Serial.print("AC_DIC : "); Serial.println(AutoCompleteOptions);
+
+            if(AutoCompleteLength >= MaxAutocompleteLength || newLetter == 0) //We have 5 options end of array.
             {
-              //DisplayText(currentWord);
-              AutoCompleteOptions += currentWord;
-              AutoCompleteOptions += '/';
-              ++AutoCompleteLength;
-
-              //Serial.print("AC_DIC : "); Serial.println(AutoCompleteOptions);
-
-              if(AutoCompleteLength >= MaxAutocompleteLength)
-              {
-                i = 300;
-              }
+              i = 300;
             }
-            rejected = false;
-            currentWord = "";
-            currentWordPlace = 0;
           }
-          else if(newLetter == CurrentTypedWord[currentWordPlace] || currentWordPlace >= CurrentTypedWord.length())
-          {
-            //Serial.print("["); Serial.print(newLetter); Serial.print("]");
-            currentWord += newLetter;
-            ++currentWordPlace;
-            // DisplayText(currentWord);
-            // DisplayText(" - ");
-          }
-          else
-          {
-            //Serial.print("Rejecting: "); Serial.println(currentWord);
-            rejected = true;
-            //Serial.print("X");
-
-          }
+          rejected = false;
+          currentWord = "";
+          currentWordPlace = 0;
+        }
+        else if(newLetter == CurrentTypedWord[currentWordPlace] || currentWordPlace >= CurrentTypedWord.length())
+        {
+          //Serial.print("["); Serial.print(newLetter); Serial.print("]");
+          currentWord += newLetter;
+          ++currentWordPlace;
+          // DisplayText(currentWord);
+          // DisplayText(" - ");
         }
         else
         {
-          i = 300;
+          //Serial.print("Rejecting: "); Serial.println(currentWord);
+          rejected = true;
+          //Serial.print("X");
+
         }
       }
     }
