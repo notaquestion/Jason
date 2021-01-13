@@ -15,11 +15,8 @@ float MouseTimer = 0.0;  //Timer used to determine mouse roation and angle in Mo
 enum Commands {None, Back, Select1}; //The commands we can issue with our hardware. Usually returned by AwaitInput()
 Commands NextCommand = None; //What to do next.
 
-//The old way, BAD.
-//String CurrentMenu = "IdleMenu"; //The menu we're in, should be replaced by an enum.
-//String CurrentSelection = ""; //A string sometimes representing the next menu and sometimes representing a function we want to perform.
-
 ///////////////////////MENU STUFF///////////////////////
+//All our menus tabbed by menu depth, linke to MenuTreeAsStrings bellow by index/position.
 enum MenuTree {
   NoMenu,
   IdleMenu, //This isn't really a menu, more of a waiting state.
@@ -39,9 +36,13 @@ enum MenuTree {
   MouseMenu
 };
 
-MenuTree CurrentMenu = IdleMenu;
-MenuTree NextMenu = NoMenu;
+MenuTree CurrentMenu = IdleMenu; //The menu we're currently on. Used as the control for a bit switch statment. Sometimes, we stick the name of a command in there, do the command, then update it to go back to the last menu.
 
+
+String CurrentTypedWord = ""; //Every letter we've typed since space
+String AutoCompleteOptions = ""; //A string with 5 words matching our CurrentyTypedWord each sepearted by a /
+
+//Sometimes we need the String version of the enum above.
 static const char * MenuTreeAsStrings[] = {
   "None",
   "IdleMenu", 
@@ -61,6 +62,7 @@ static const char * MenuTreeAsStrings[] = {
   "MouseMenu"
 };
 
+//Converts the Enum to Coresponding string.
 String MenuTreeToString(MenuTree menu)
 {
   return MenuTreeAsStrings[menu];
@@ -92,10 +94,6 @@ MenuTree M_SpecialKeyMenu[] = {
   NoMenu //Serves as a terminatior when itterating through array.
 };
 
-
-
-
-
 ///////////////////////COLORS///////////////////////
 uint32_t ColorWhite = 0xFFFFFF;
 uint32_t ColorRed = 0xFF0000;
@@ -111,8 +109,8 @@ uint32_t GoBackColor  = ColorRed;
 uint32_t MouseColor   = ColorBlue;
 
 
-
 ///////////////////////TYPE LETTER STORAGE///////////////////////
+//This is a 2D grid 
 const char LetterClumps_1[] PROGMEM = "_/E/T/S/D/W";
 const char LetterClumps_2[] PROGMEM = "O/H/I/L/F/K";
 const char LetterClumps_3[] PROGMEM = "A/N/U/G/V/Z";
@@ -125,12 +123,13 @@ const int LetterClumps_SIZE = 7;
 
 
 ///////////////////////FREQUENTLY USED WORD STORAGE///////////////////////
+//Stacy has his own verison of this I've edited with him.
 const char Words_A[] PROGMEM = "ABOUT/ACTION/ADVENTURE CAPATALIST/AFTER/ALSO/AMANDA";
 const char Words_B[] PROGMEM = "BACK/BECAUSE/BRANDON/BURRITO/BIG FISH GAMES";
 const char Words_C[] PROGMEM = "CAKE/CHEESEBURGER/CHERIE/CHEST/COME/COMEDY/COMPUTER/CONCERT/COOKIES/COULD";
 const char Words_D[] PROGMEM = "DANIEL/DEONTE/DRAMA/DRINK STRAW";
 const char Words_E[] PROGMEM = "EVEN";
-const char Words_F[] PROGMEM = "FIND/FINGERS/FIRST/FRENCH FRIES/FROM/FUNNY";
+const char Words_F[] PROGMEM = "FIND/FINGERS/FIRST/FRENCH FRIES/FROM/FROSTWIRE/FUNNY";
 const char Words_G[] PROGMEM = "GAMES/GINA/GIVE/GOOD/GOOD";
 const char Words_H[] PROGMEM = "HAND/HAVE/HEAD/HIDDEN OBJECT/HIPS/HURT";
 const char Words_I[] PROGMEM = "I WANT/I WANT TO/I WANT TO DO/I WANT TO GET/ICE CREAM SANDWICH/INTO";
@@ -140,9 +139,9 @@ const char Words_L[] PROGMEM = "LASAGNA/LEMONADE WATER/LETTERS/LIKE/LIKE/LOOK/LO
 const char Words_M[] PROGMEM = "MACARONI/MAKE/MARCY/MICHAEL/MIKE/MONTI/MOST/MOVIE";
 const char Words_N[] PROGMEM = "NECK/NICK";
 const char Words_O[] PROGMEM = "ONLY/OTHER/OVER";
-const char Words_P[] PROGMEM = "PAINFUL/PAUL/PEOPLE/PILLOW/PINEAPPLE WATER/PLAY";
-const char Words_S[] PROGMEM = "SHEET/SOME/STEAM";
-const char Words_T[] PROGMEM = "TAKE/TANGELO/TANGELO/THAN/THAT/THEIR/THEM/THEN/THERE/THESE/THEY/THINK/THIS/TIME/TIRED/TOES/TURN/TV SERIES";
+const char Words_P[] PROGMEM = "PAINFUL/PAUL/PEOPLE/PILLOW/PINEAPPLE WATER/PLAY/PLEASE";
+const char Words_S[] PROGMEM = "SHEET/SOME/STEAM/SWEAT";
+const char Words_T[] PROGMEM = "TAKE/TANGELO/THAN/THANK YOU/THAT/THEIR/THEM/THEN/THERE/THESE/THEY/THINK/THIS/TIME/TIRED/TOES/TURN/TV SERIES";
 const char Words_W[] PROGMEM = "WANT/WANT/WELL/WENT/WHAT/WHEELCHAIR/WHEN/WHICH/WILL/WITH/WORDS/WORK/WOULD/WRITE";
 const char Words_Y[] PROGMEM = "YEAR/YOUR";
 
@@ -194,84 +193,83 @@ int bufferSize = 200;
 
 void loop() {
 
-  //NextCommand = AwaitInput(CycleSpeed);
-
-  if(NextMenu != NoMenu)
-  {
-    CurrentMenu = NextMenu;
-    NextMenu = NoMenu;
-  }
+  Commands input = None;
 
   //Big state machine based off MenuTree enum. 
   switch(CurrentMenu) {
     
-    case NoMenu:
+    case NoMenu: {
         while(true)
         {
           Serial.println("Error: NO MENU?");
           delay(1);
         }
         break;
+    }
 
-    case IdleMenu: 
-        Commands input = AwaitInput(CycleSpeed);
+    case IdleMenu: { 
+        input = AwaitInput(CycleSpeed);
 
         if(input == Select1)
         {
-            DisplayText("Select Pressed, Hold to Use Mouse");
-            delay(1000);
-            ClearText("Select Pressed, Hold to Use Mouse");
+            // DisplayText("Select Pressed, Hold to Use Mouse");
+            // delay(1000);
+            // ClearText("Select Pressed, Hold to Use Mouse");
         }
         else if(input == Back)
         {
-            DisplayText("Going to Mouse Menu");
-            delay(1000);
-            ClearText("Going to Mouse Menu");
+            // DisplayText("Going to Mouse Menu");
+            // delay(1000);
+            // ClearText("Going to Mouse Menu");
 
-            CurrentMenu = MainMenu;
+            CurrentMenu = MouseMenu;
         }
 
         break;
+    }
 
-    case MainMenu: 
-        Commands input = DisplayMenuOptions(M_MainMenu);
+    case MainMenu: { 
+        input = DisplayMenuOptions(M_MainMenu, 0xFFFFFF);
         if(input == Back)
         {
           CurrentMenu = MouseMenu;
         }
         break;
+    }
 
-      case KeyboardMenu:
-          Commands input = DisplayMenuOptions(M_KeyboardMenu);
+      case KeyboardMenu: {
+          input = DisplayMenuOptions(M_KeyboardMenu, 0xFF5555);
           if(input == Back)
           {
             CurrentMenu = MainMenu;
           }
           break;
+      }
 
-        case TypeLetter:
-            String TypeWhat = DispalyGridOptionsAndType(LetterClumps, LetterClumps_SIZE, '/', KeyboardMenu);
-            if(TypeWhat == "_")
+        case TypeLetter: {
+            String SelectedCharacters = DispalyGridOptionsAndType(LetterClumps, LetterClumps_SIZE, '/', KeyboardMenu);
+            if(SelectedCharacters == "_")
             {
-              TypeWhat = " ";
+              SelectedCharacters = " ";
               CurrentTypedWord = "";
               AutoCompleteOptions = "";
             }
 
-            if(TypeWhat != "")
+            if(SelectedCharacters != "")
             {
-              if(TypeWhat != " ")
+              if(SelectedCharacters != " ")
               {
-                CurrentTypedWord += TypeWhat;
+                CurrentTypedWord += SelectedCharacters;
               }
-              DisplayText(TypeWhat);
-              PopulateAutoCompleteDicOptions();
+              DisplayText(SelectedCharacters);
               CurrentMenu = KeyboardMenu;
+              PopulateAutoCompleteDicOptions();
             }
 
             break;
+        }
 
-        case Backspace: 
+        case Backspace: { 
             Keyboard.write(KEY_BACKSPACE);
             CurrentTypedWord.remove(CurrentTypedWord.length() - 1);
 
@@ -279,7 +277,7 @@ void loop() {
             while(again)
             {
               DisplayText("<--REPEAT?--");
-              Commands input = AwaitInput(cycleSpeed);
+              input = AwaitInput(CycleSpeed);
 
               if(input == None)
               {
@@ -289,7 +287,6 @@ void loop() {
               {
                 ClearText("<--REPEAT?--");
                 Keyboard.write(KEY_BACKSPACE);
-                CurrentSelection = "";
 
                 CurrentTypedWord.remove(CurrentTypedWord.length() - 1);
               }
@@ -300,64 +297,75 @@ void loop() {
 
             CurrentMenu = KeyboardMenu;
             break;
+        }
 
-        case SpecialKeyMenu:
-            Commands input = DisplayMenuOptions(M_SpecialKeyMenu);
+        case SpecialKeyMenu: {
+            input = DisplayMenuOptions(M_SpecialKeyMenu, 0x7700FF);
             if(input == Back)
             {
               CurrentMenu = KeyboardMenu;
             }
             break;
+        }
 
-          case Enter: 
+          case Enter: { 
               Keyboard.write(KEY_RETURN);
               CurrentMenu = SpecialKeyMenu;
               break;
+          }
 
-          case Tab:
+          case Tab: {
               Keyboard.write(KEY_TAB);
               CurrentMenu = SpecialKeyMenu;
               break;
+          }
 
               //Keyboard.write(KEY_CAPS_LOCK);
               //Keyboard.write(KEY_ESC);
 
-      case OptionsMenu:
-          Commands input = DisplayMenuOptions(M_OptionsMenu);
+      case OptionsMenu: {
+          input = DisplayMenuOptions(M_OptionsMenu, 0x55FFFF);
 
           if(input == Back)
           {
             CurrentMenu = MainMenu;
           }
           break;
+      }
 
-        case FasterCycleSpeed:
+        case FasterCycleSpeed: {
             IncreaseCycleSpeed();
             CurrentMenu = OptionsMenu;
             break;
+        }
 
-        case LongerCycleSpeed:
+        case LongerCycleSpeed: {
             DecreaseCycleSpeed();
             CurrentMenu = OptionsMenu;
             break;
+        }
 
-        case ShorterGoBackInput:
+        case ShorterGoBackInput: {
             ShortenDelay();
             CurrentMenu = OptionsMenu;
             break;
+        }
 
-        case LongerGoBackInput:
+        case LongerGoBackInput: {
             IncreaseDelay();
             CurrentMenu = OptionsMenu;
             break;
+        }
 
-    case MouseMenu:
+    case MouseMenu: {
         MouseFunctions();
         break;
+    }
 
-    default:
-        Serial.println("This Current Menu doesnt exist.");
+    default: {
+        Serial.print("This Current Menu doesnt exist:"); Serial.println(CurrentMenu);
         break;
+    }
   }
 
 }
@@ -382,18 +390,22 @@ void MouseFunctions()
 
       //MOUSE SETTINGS
       //int CircleSpeed = 200; // Delay between each frame of the rotating circle, lower value, faster movement.
-      int CircleSpeed = 10; 
-      float CircleSize = 6; // Circle Radius
+      int CircleSpeed = 125; 
+      float CircleSize = 5; // Circle Radius
       
       int MoveDelay = 500; // Hold time/delay before mouse starts moving instead of clicking.
       
       int MouseLinearSpeed = 100; //The Delay between each frame of the mouse moving in a line. Longer is slower.
-      int HoldToGoBackLength = 60; //How many MouseLinearSpeed delays we should wait before going back to the MainMenu from this Mouse Menu
+      int HoldToGoBackLength = 150; //How many MouseLinearSpeed delays we should wait before going back to the MainMenu from this Mouse Menu
       
       //INTERNAL
       bool xDirection = false;
       float xMax = CircleSize * (float)cos(MouseTimer);
       float yMax = CircleSize * (float)sin(MouseTimer);
+
+      float minSpeed = 0.0;//Minimum mouse speed
+      float maxSpeed = 7.5;//Maximum mouse speed
+      float rampUpSpeed = 0.05; //Scalar effecting how quickly we ramp from min to max.
 
       int xMove = (round(xMax));
       int yMove = (round(yMax));
@@ -451,14 +463,29 @@ void MouseFunctions()
           
           heldTime = 0; //Lets use this again.
 
+          bool signaledGoBack = false;
           //As long as we're still holding this. Move, and accelerate our speed, and fill our HeldTime/fill over time meter.
           //If heldTime Goes over HoldToGoBackLength, we go back to typing Menu.
           while(TouchCondition()) 
           {
-            Mouse.move(heldTime * 0.1 * xMove, heldTime *  0.1 * yMove); //Using heldTime as a scaler results in a linear acceleration.
+
+            float speed = constrain(heldTime * rampUpSpeed,  minSpeed, maxSpeed);
+            Mouse.move(speed * float(xMove), speed *  float(yMove)); //Using heldTime as a scaler results in a linear acceleration.
             delay(MouseLinearSpeed);
             ++heldTime;
-            fillOverTime(PendingColor, heldTime, HoldToGoBackLength); //Let us know how long until we trigger a go back to main menu.
+            if(heldTime < HoldToGoBackLength)
+            {
+              fillOverTime(PendingColor, heldTime, HoldToGoBackLength); //Let us know how long until we trigger a go back to main menu.
+            }
+            else
+            {
+              if(!signaledGoBack)
+              {
+                signaledGoBack = true;
+                colorWipe(GoBackColor, 25);
+                CircuitPlayground.playTone(50, 300, false);
+              }
+            }
           }
 
           if(heldTime > HoldToGoBackLength)
@@ -492,7 +519,7 @@ void MouseFunctions()
 bool TouchCondition()
 {
   //Serial.print(" CT0("); Serial.print(CircuitPlayground.readCap(0));Serial.print(')');
-  return CircuitPlayground.readCap(0) > 1000;
+  return CircuitPlayground.readCap(0) > 1200;
 }
 
 Commands AwaitInput(int FramesToWait)
@@ -630,7 +657,7 @@ void RemoveCursor()
 ////////////////////////////LETTER/WORD DISPLAY//////////////////////////////////////
 //(const char* const* array)
 
-Commands DisplayMenuOptions(MenuTree menu_[]) 
+Commands DisplayMenuOptions(MenuTree menu_[], uint32_t menuColor_) 
 {
   AddCurrsor();
 
@@ -643,11 +670,11 @@ Commands DisplayMenuOptions(MenuTree menu_[])
 
       DisplayText(selectionToDisplay);
 
-      // if(M < 6)
-      // {
-      //     strip.setPixelColor(M, PendingColor);         
-      //                      //  Pause for a moment
-      // }
+      if(M < 10)
+      {
+          CircuitPlayground.setPixelColor(M, menuColor_);         
+                           //  Pause for a moment
+      }
 
       doWhat = AwaitInput(CycleSpeed); //Will return true when input conditoin true, or false in 1000 frames.
       
@@ -659,7 +686,7 @@ Commands DisplayMenuOptions(MenuTree menu_[])
       
       if(doWhat == Select1)
       {
-        NextMenu = menu_[M];
+        CurrentMenu = menu_[M];
 
         RemoveCursor();
         return doWhat;
@@ -838,6 +865,121 @@ String ParseStringAndPresentOptions(String parseMe, char seperator)
   }
 }
 
+String PopulateAutoCompleteDicOptions()
+{
+  Serial.print("Current Typed Word: "); Serial.println(CurrentTypedWord);
+  Serial.println("Looking for autocomplete options.");
+  AutoCompleteOptions = "";
+  if(CurrentTypedWord.length() > 0)
+  {
+    bool flag = false;
+    String WordsStartingWith = "";
+    for(int a = 0; a < AutoSuggestDic_SIZE; ++a)
+    {
+      WordsStartingWith = AutoSuggestDic[a];
+
+      if(WordsStartingWith[0] == CurrentTypedWord[0])
+      {
+        a = AutoSuggestDic_SIZE;
+        flag = true;
+      }
+    }
+    int MaxAutocompleteLength = 5;
+    int AutoCompleteLength = 0;
+    int W = 0;
+    String currentWord = "";
+    int currentWordPlace = 0;
+
+    //Serial.println("--Compiling auto complete--");
+    if(flag == true)
+    {
+      bool rejected = false;
+      for (int i = 0; i < 300; ++i)
+      {
+        //delay(100);
+        
+        char newLetter = WordsStartingWith[i];
+        if(newLetter != 0)
+        {
+          if ('/' == newLetter)
+          {
+            //Serial.print("/");
+            if(currentWord.length() > 0 && rejected != true)
+            {
+              //DisplayText(currentWord);
+              AutoCompleteOptions += currentWord;
+              AutoCompleteOptions += '/';
+              ++AutoCompleteLength;
+
+              //Serial.print("AC_DIC : "); Serial.println(AutoCompleteOptions);
+
+              if(AutoCompleteLength >= MaxAutocompleteLength)
+              {
+                i = 300;
+              }
+            }
+            rejected = false;
+            currentWord = "";
+            currentWordPlace = 0;
+          }
+          else if(newLetter == CurrentTypedWord[currentWordPlace] || currentWordPlace >= CurrentTypedWord.length())
+          {
+            //Serial.print("["); Serial.print(newLetter); Serial.print("]");
+            currentWord += newLetter;
+            ++currentWordPlace;
+            // DisplayText(currentWord);
+            // DisplayText(" - ");
+          }
+          else
+          {
+            //Serial.print("Rejecting: "); Serial.println(currentWord);
+            rejected = true;
+            //Serial.print("X");
+
+          }
+        }
+        else
+        {
+          i = 300;
+        }
+      }
+    }
+    if(AutoCompleteOptions.length() > 0)
+    {
+      AutoCompleteOptions.remove(AutoCompleteOptions.length() - 1, 1);
+      DisplayText(" --- Auto Complete --- ");
+      DisplayText(AutoCompleteOptions);
+      Commands doWhatNow = AwaitInput(CycleSpeed);
+      ClearText(AutoCompleteOptions);
+      ClearText(" --- Auto Complete --- ");
+
+      if(doWhatNow == Select1)
+      {
+        String typeWhat = ParseStringAndPresentOptions(AutoCompleteOptions, '/');
+
+        if(typeWhat == "")
+        {
+          CurrentMenu = KeyboardMenu;
+        }
+        else
+        {
+          ClearText(CurrentTypedWord);
+          DisplayText(typeWhat);
+          DisplayText(" ");
+          AutoCompleteOptions = "";
+          CurrentTypedWord = "";
+        }
+      }
+
+    }
+
+    //ParseStringAndPresentOptions(AutoCompleteOptions, '/');
+    //DispalyGridOptionsAndType(autoCompleteOptions, 1, '/', "KeyboardMenu");
+  }
+
+  return "";
+}
+
 
 /////////////////////////////ONBOARD OPTIONS/SETTINGS FUNCTIONS//////////////////////////////////////
 void ShortenDelay()
@@ -905,7 +1047,7 @@ void theaterChaseRainbow(int spinSpeed, int duration){
 
 void fillOverTime(uint32_t color, int currentTime, int maxTime)
 {
-  int numToFill = 1 + ((float)currentTime/(float)maxTime * (float)10.0);
+  int numToFill =  ((float)currentTime/(float)maxTime * (float)10.5);
   //Serial.println(10 * (float)currentTime/(float)maxTime);
   //for(int i=0; i< numToFill; i++) { // For each pixel in strip...
     CircuitPlayground.setPixelColor(numToFill, color);
